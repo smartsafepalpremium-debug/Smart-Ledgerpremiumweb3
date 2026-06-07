@@ -74,7 +74,7 @@ export default function Login() {
                 type="email"
                 required
                 className="bg-background/50 h-12"
-                placeholder="admin@smartledger.com"
+                placeholder=""
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
