@@ -44,6 +44,13 @@ export function setAuthTokenGetter(getter: AuthTokenGetter | null): void {
   _authTokenGetter = getter;
 }
 
+// Automatically configure it to read from localStorage for admin_token
+if (typeof window !== "undefined") {
+  setAuthTokenGetter(() => {
+    return window.localStorage.getItem("admin_token");
+  });
+}
+
 function isRequest(input: RequestInfo | URL): input is Request {
   return typeof Request !== "undefined" && input instanceof Request;
 }

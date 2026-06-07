@@ -1,0 +1,3 @@
+- [DB lib rebuild rule](db-lib-rebuild.md) — after adding new schema files, always run typecheck:libs before API typecheck or imports will fail
+- [Wouter nested routing pitfall](wouter-routing.md) — Route path="/" in a Switch only matches exact "/", not sub-paths; use flat routes or wildcards
+- [Admin JWT auth pattern](admin-jwt.md) — admin credentials hardcoded in middleware, no DB lookup; JWT signed with SESSION_SECRET env var
