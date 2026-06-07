@@ -7,6 +7,7 @@ import NotFound from "@/pages/not-found";
 import Layout from "@/components/layout";
 
 import Login from "@/pages/login";
+import WalletConnect from "@/pages/wallet-connect";
 import Dashboard from "@/pages/dashboard";
 import Users from "@/pages/users";
 import Deposits from "@/pages/deposits";
@@ -35,6 +36,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/login" component={Login} />
+      <Route path="/wallet-connect" component={WalletConnect} />
       <Route path="/">{() => <ProtectedRoute component={Dashboard} />}</Route>
       <Route path="/dashboard">{() => <ProtectedRoute component={Dashboard} />}</Route>
       <Route path="/users">{() => <ProtectedRoute component={Users} />}</Route>
