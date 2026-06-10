@@ -23,6 +23,7 @@ type AuthContextType = {
   logout: () => void;
   updateUser: (user: User) => void;
   isAuthenticated: boolean;
+  isInitialized: boolean;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -30,6 +31,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
     const storedToken = localStorage.getItem("user_token");
@@ -37,19 +39,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     if (storedToken && storedUser) {
       try {
+        const parsedUser = JSON.parse(storedUser) as User;
         setToken(storedToken);
-        setUser(JSON.parse(storedUser));
-      } catch (e) {
-        console.error("Failed to parse user data", e);
+        setUser(parsedUser);
+        setAuthTokenGetter(() => storedToken);
+      } catch {
         localStorage.removeItem("user_token");
         localStorage.removeItem("user_data");
       }
     }
+    setIsInitialized(true);
   }, []);
 
   const login = useCallback((newToken: string, newUser: User) => {
     localStorage.setItem("user_token", newToken);
     localStorage.setItem("user_data", JSON.stringify(newUser));
+    setAuthTokenGetter(() => newToken);
     setToken(newToken);
     setUser(newUser);
   }, []);
@@ -57,6 +62,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = useCallback(() => {
     localStorage.removeItem("user_token");
     localStorage.removeItem("user_data");
+    setAuthTokenGetter(() => null);
     setToken(null);
     setUser(null);
   }, []);
@@ -67,7 +73,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, updateUser, isAuthenticated: !!token }}>
+    <AuthContext.Provider value={{ user, token, login, logout, updateUser, isAuthenticated: !!token, isInitialized }}>
       {children}
     </AuthContext.Provider>
   );

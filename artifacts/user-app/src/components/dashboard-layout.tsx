@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/contexts/auth-context";
 import { cn } from "@/lib/utils";
@@ -25,15 +26,18 @@ function NavItem({
   label,
   icon: Icon,
   active,
+  onClick,
 }: {
   path: string;
   label: string;
   icon: React.FC<{ className?: string }>;
   active: boolean;
+  onClick?: () => void;
 }) {
   return (
     <Link
       href={path}
+      onClick={onClick}
       className={cn(
         "flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all",
         active
@@ -47,7 +51,7 @@ function NavItem({
   );
 }
 
-export function DashboardLayout({ children }: { children: React.ReactNode }) {
+function SidebarContent({ onNav }: { onNav?: () => void }) {
   const [location] = useLocation();
   const { user, logout } = useAuth();
 
@@ -61,69 +65,124 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     : "U";
 
   return (
+    <div className="flex flex-col h-full">
+      {/* Logo */}
+      <div className="px-6 py-5 border-b border-border">
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-md bg-primary flex items-center justify-center">
+            <span className="text-primary-foreground font-bold text-xs">SL</span>
+          </div>
+          <span className="font-semibold text-sm text-foreground">Smartledger</span>
+        </div>
+      </div>
+
+      {/* Nav */}
+      <div className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+        <p className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-widest px-4 mb-2">
+          Menu
+        </p>
+        {MENU_ITEMS.map((item) => (
+          <NavItem key={item.path} {...item} active={isActive(item.path)} onClick={onNav} />
+        ))}
+
+        <div className="pt-4">
+          <p className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-widest px-4 mb-2">
+            Security
+          </p>
+          {SECURITY_ITEMS.map((item) => (
+            <NavItem key={item.path} {...item} active={isActive(item.path)} onClick={onNav} />
+          ))}
+        </div>
+      </div>
+
+      {/* User */}
+      <div className="px-3 py-4 border-t border-border">
+        <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg">
+          <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0">
+            <span className="text-primary-foreground font-bold text-xs">{initials}</span>
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-foreground truncate">
+              {user ? `${user.firstName} ${user.lastName}` : "User"}
+            </p>
+            <p className="text-xs text-muted-foreground truncate">{user?.email ?? ""}</p>
+          </div>
+        </div>
+        <button
+          onClick={logout}
+          className="w-full mt-2 flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors"
+        >
+          <SignOutIcon className="w-4 h-4" />
+          Sign Out
+        </button>
+      </div>
+    </div>
+  );
+}
+
+export function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  return (
     <div className="flex h-screen bg-background overflow-hidden">
-      {/* Sidebar */}
-      <aside className="w-60 shrink-0 flex flex-col bg-[hsl(222,47%,9%)] border-r border-border overflow-y-auto">
-        {/* Logo */}
-        <div className="px-6 py-5 border-b border-border">
+      {/* Desktop Sidebar */}
+      <aside className="hidden md:flex w-60 shrink-0 flex-col bg-[hsl(222,47%,9%)] border-r border-border">
+        <SidebarContent />
+      </aside>
+
+      {/* Mobile overlay */}
+      {mobileOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/60 md:hidden"
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
+
+      {/* Mobile Sidebar drawer */}
+      <aside
+        className={cn(
+          "fixed inset-y-0 left-0 z-50 w-64 flex flex-col bg-[hsl(222,47%,9%)] border-r border-border transition-transform duration-200 md:hidden",
+          mobileOpen ? "translate-x-0" : "-translate-x-full"
+        )}
+      >
+        <SidebarContent onNav={() => setMobileOpen(false)} />
+      </aside>
+
+      {/* Main */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Mobile top bar */}
+        <div className="md:hidden flex items-center gap-3 px-4 py-3 border-b border-border bg-[hsl(222,47%,9%)] shrink-0">
+          <button
+            onClick={() => setMobileOpen(true)}
+            className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors"
+          >
+            <HamburgerIcon className="w-5 h-5" />
+          </button>
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-md bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-xs">SL</span>
+            <div className="w-6 h-6 rounded-md bg-primary flex items-center justify-center">
+              <span className="text-primary-foreground font-bold text-[10px]">SL</span>
             </div>
             <span className="font-semibold text-sm text-foreground">Smartledger</span>
           </div>
         </div>
 
-        {/* Nav */}
-        <div className="flex-1 px-3 py-4 space-y-1">
-          <p className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-widest px-4 mb-2">
-            Menu
-          </p>
-          {MENU_ITEMS.map((item) => (
-            <NavItem key={item.path} {...item} active={isActive(item.path)} />
-          ))}
-
-          <div className="pt-4">
-            <p className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-widest px-4 mb-2">
-              Security
-            </p>
-            {SECURITY_ITEMS.map((item) => (
-              <NavItem key={item.path} {...item} active={isActive(item.path)} />
-            ))}
-          </div>
-        </div>
-
-        {/* User */}
-        <div className="px-3 py-4 border-t border-border">
-          <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg">
-            <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0">
-              <span className="text-primary-foreground font-bold text-xs">{initials}</span>
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-foreground truncate">
-                {user ? `${user.firstName} ${user.lastName}` : "User"}
-              </p>
-              <p className="text-xs text-muted-foreground truncate">Beginner Trader</p>
-            </div>
-          </div>
-          <button
-            onClick={logout}
-            className="w-full mt-2 flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors"
-          >
-            <SignOutIcon className="w-4 h-4" />
-            Sign Out
-          </button>
-        </div>
-      </aside>
-
-      {/* Main */}
-      <main className="flex-1 overflow-y-auto">
-        {children}
-      </main>
+        <main className="flex-1 overflow-y-auto">
+          {children}
+        </main>
+      </div>
     </div>
   );
 }
 
+function HamburgerIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <line x1="3" y1="6" x2="21" y2="6" />
+      <line x1="3" y1="12" x2="21" y2="12" />
+      <line x1="3" y1="18" x2="21" y2="18" />
+    </svg>
+  );
+}
 function OverviewIcon({ className }: { className?: string }) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

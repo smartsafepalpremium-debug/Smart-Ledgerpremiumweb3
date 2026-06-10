@@ -15,8 +15,8 @@ const statusColor: Record<string, string> = {
 
 export default function Withdraw() {
   const { user } = useAuth();
-  const { data: withdrawals } = useGetUserWithdrawals({ query: {} });
-  const { data: methods } = useGetUserPaymentMethods({ query: {} });
+  const { data: withdrawals } = useGetUserWithdrawals({});
+  const { data: methods } = useGetUserPaymentMethods({});
   const [amount, setAmount] = useState("");
   const [selectedMethod, setSelectedMethod] = useState("");
   const [walletAddress, setWalletAddress] = useState("");

@@ -7,7 +7,7 @@ function fmt(n: number) {
 }
 
 export default function InvestmentPlans() {
-  const { data: plans, isLoading } = useGetUserPlans({ query: {} });
+  const { data: plans, isLoading } = useGetUserPlans({});
 
   const planList = Array.isArray(plans) ? plans : [];
 

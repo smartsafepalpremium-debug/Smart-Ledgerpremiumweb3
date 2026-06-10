@@ -15,7 +15,7 @@ const statusColor: Record<string, string> = {
 
 export default function Loans() {
   const { user } = useAuth();
-  const { data: loans, isLoading, refetch } = useGetUserLoans({ query: {} });
+  const { data: loans, isLoading, refetch } = useGetUserLoans({});
   const [amount, setAmount] = useState("");
   const [purpose, setPurpose] = useState("");
   const [error, setError] = useState("");

@@ -15,8 +15,8 @@ const statusColor: Record<string, string> = {
 
 export default function Deposit() {
   const { user } = useAuth();
-  const { data: methods, isLoading: loadingMethods } = useGetUserPaymentMethods({ query: {} });
-  const { data: deposits } = useGetUserDeposits({ query: {} });
+  const { data: methods, isLoading: loadingMethods } = useGetUserPaymentMethods({});
+  const { data: deposits } = useGetUserDeposits({});
   const [selectedMethod, setSelectedMethod] = useState<any>(null);
   const [amount, setAmount] = useState("");
   const [txHash, setTxHash] = useState("");

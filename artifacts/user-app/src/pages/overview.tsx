@@ -16,7 +16,7 @@ function fmt(n: number) {
 
 export default function Overview() {
   const { user } = useAuth();
-  const { data: portfolio } = useGetUserPortfolio({ query: { enabled: true } });
+  const { data: portfolio } = useGetUserPortfolio({});
   const [coins, setCoins] = useState<Coin[]>([]);
   const [loading, setLoading] = useState(true);
 

@@ -14,7 +14,7 @@ const typeColor: Record<string, string> = {
 };
 
 export default function Transactions() {
-  const { data: transactions, isLoading } = useGetUserTransactions({ query: {} });
+  const { data: transactions, isLoading } = useGetUserTransactions({});
 
   const txList = Array.isArray(transactions) ? transactions : [];
 

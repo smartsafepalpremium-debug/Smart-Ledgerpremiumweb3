@@ -3,7 +3,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/contexts/auth-context";
-import { setAuthTokenGetter } from "@workspace/api-client-react";
 import { useEffect } from "react";
 
 import Login from "@/pages/login";
@@ -21,10 +20,6 @@ import Kyc from "@/pages/kyc";
 import WalletConnect from "@/pages/wallet-connect";
 import Settings from "@/pages/settings";
 
-if (typeof window !== "undefined") {
-  setAuthTokenGetter(() => window.localStorage.getItem("user_token"));
-}
-
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: { retry: 1, staleTime: 30_000 },
@@ -32,16 +27,50 @@ const queryClient = new QueryClient({
 });
 
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isInitialized } = useAuth();
   const [, setLocation] = useLocation();
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (isInitialized && !isAuthenticated) {
       setLocation("/login");
     }
-  }, [isAuthenticated, setLocation]);
+  }, [isAuthenticated, isInitialized, setLocation]);
+
+  if (!isInitialized) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          <span className="text-sm text-muted-foreground">Loading...</span>
+        </div>
+      </div>
+    );
+  }
 
   if (!isAuthenticated) return null;
+
+  return <Component />;
+}
+
+function GuestRoute({ component: Component }: { component: React.ComponentType }) {
+  const { isAuthenticated, isInitialized } = useAuth();
+  const [, setLocation] = useLocation();
+
+  useEffect(() => {
+    if (isInitialized && isAuthenticated) {
+      setLocation("/");
+    }
+  }, [isAuthenticated, isInitialized, setLocation]);
+
+  if (!isInitialized) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (isAuthenticated) return null;
 
   return <Component />;
 }
@@ -49,8 +78,8 @@ function ProtectedRoute({ component: Component }: { component: React.ComponentTy
 function Router() {
   return (
     <Switch>
-      <Route path="/login" component={Login} />
-      <Route path="/register" component={Register} />
+      <Route path="/login" component={() => <GuestRoute component={Login} />} />
+      <Route path="/register" component={() => <GuestRoute component={Register} />} />
 
       <Route path="/" component={() => <ProtectedRoute component={Overview} />} />
       <Route path="/overview" component={() => <ProtectedRoute component={Overview} />} />

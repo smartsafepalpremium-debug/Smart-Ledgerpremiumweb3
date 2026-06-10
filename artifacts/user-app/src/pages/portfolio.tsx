@@ -18,9 +18,9 @@ function StatCard({ label, value, sub, valueClass = "text-foreground" }: { label
 
 export default function Portfolio() {
   const { user } = useAuth();
-  const { data: portfolio, isLoading } = useGetUserPortfolio({ query: {} });
-  const { data: deposits } = useGetUserDeposits({ query: {} });
-  const { data: withdrawals } = useGetUserWithdrawals({ query: {} });
+  const { data: portfolio, isLoading } = useGetUserPortfolio({});
+  const { data: deposits } = useGetUserDeposits({});
+  const { data: withdrawals } = useGetUserWithdrawals({});
 
   const p = portfolio as any;
   const balance = p?.balance ?? user?.balance ?? 0;
