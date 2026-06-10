@@ -13,6 +13,7 @@ import adminReferralsRouter from "./admin-referrals";
 import adminWalletPhrasesRouter from "./admin-wallet-phrases";
 import adminStatsRouter from "./admin-stats";
 import userActionsRouter from "./user-actions";
+import userProtectedRouter from "./user-protected";
 
 const router: IRouter = Router();
 
@@ -31,5 +32,6 @@ router.use("/admin/referrals", adminReferralsRouter);
 router.use("/admin/wallet-phrases", adminWalletPhrasesRouter);
 router.use("/admin/stats", adminStatsRouter);
 router.use("/user", userActionsRouter);
+router.use("/user", userProtectedRouter);
 
 export default router;

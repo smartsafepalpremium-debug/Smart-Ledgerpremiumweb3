@@ -805,6 +805,177 @@ paths:
               schema:
                 $ref: "#/components/schemas/WalletPhrase"
 
+  /user/me:
+    get:
+      operationId: getUserMe
+      tags: [user-actions]
+      summary: Get current user profile
+      responses:
+        "200":
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          description: Not authenticated
+    patch:
+      operationId: updateUserMe
+      tags: [user-actions]
+      summary: Update current user profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserProfileUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
+  /user/transactions:
+    get:
+      operationId: getUserTransactions
+      tags: [user-actions]
+      summary: Get current user transactions
+      responses:
+        "200":
+          description: Transactions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Transaction"
+
+  /user/deposits:
+    get:
+      operationId: getUserDeposits
+      tags: [user-actions]
+      summary: Get current user deposits
+      responses:
+        "200":
+          description: Deposits
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Deposit"
+
+  /user/withdrawals:
+    get:
+      operationId: getUserWithdrawals
+      tags: [user-actions]
+      summary: Get current user withdrawals
+      responses:
+        "200":
+          description: Withdrawals
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Withdrawal"
+
+  /user/loans:
+    get:
+      operationId: getUserLoans
+      tags: [user-actions]
+      summary: Get current user loan applications
+      responses:
+        "200":
+          description: Loans
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Loan"
+    post:
+      operationId: applyForLoan
+      tags: [user-actions]
+      summary: Apply for a loan
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoanApplicationInput"
+      responses:
+        "201":
+          description: Loan application submitted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Loan"
+
+  /user/plans:
+    get:
+      operationId: getUserPlans
+      tags: [user-actions]
+      summary: Get available investment plans (public)
+      responses:
+        "200":
+          description: Plans
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Plan"
+
+  /user/payment-methods:
+    get:
+      operationId: getUserPaymentMethods
+      tags: [user-actions]
+      summary: Get active payment methods for deposits
+      responses:
+        "200":
+          description: Payment methods
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PaymentMethod"
+
+  /user/portfolio:
+    get:
+      operationId: getUserPortfolio
+      tags: [user-actions]
+      summary: Get portfolio summary for current user
+      responses:
+        "200":
+          description: Portfolio summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserPortfolio"
+
+  /user/kyc:
+    post:
+      operationId: submitKyc
+      tags: [user-actions]
+      summary: Submit KYC verification documents
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/KycSubmission"
+      responses:
+        "200":
+          description: KYC submitted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
 components:
   schemas:
     HealthStatus:
@@ -1167,6 +1338,43 @@ components:
       type: object
       properties:
         note: { type: string }
+
+    UserProfileUpdate:
+      type: object
+      properties:
+        firstName: { type: string }
+        lastName: { type: string }
+        phone: { type: string }
+        country: { type: string }
+
+    LoanApplicationInput:
+      type: object
+      required: [userId, amount, purpose]
+      properties:
+        userId: { type: integer }
+        amount: { type: number }
+        purpose: { type: string }
+
+    UserPortfolio:
+      type: object
+      required: [balance, profit, totalDeposited, totalWithdrawn, activeLoans]
+      properties:
+        balance: { type: number }
+        profit: { type: number }
+        totalDeposited: { type: number }
+        totalWithdrawn: { type: number }
+        activeLoans: { type: integer }
+        pendingDeposits: { type: integer }
+        pendingWithdrawals: { type: integer }
+
+    KycSubmission:
+      type: object
+      required: [userId, documentType, documentNumber]
+      properties:
+        userId: { type: integer }
+        documentType: { type: string }
+        documentNumber: { type: string }
+        country: { type: string }
 
     UserRegisterInput:
       type: object

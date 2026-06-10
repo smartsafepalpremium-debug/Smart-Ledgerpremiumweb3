@@ -778,3 +778,201 @@ export const SubmitWalletPhraseBody = zod.object({
 })
 
 
+/**
+ * @summary Get current user profile
+ */
+export const GetUserMeResponse = zod.object({
+  "id": zod.number(),
+  "email": zod.string(),
+  "firstName": zod.string(),
+  "lastName": zod.string(),
+  "phone": zod.string().nullish(),
+  "country": zod.string().nullish(),
+  "balance": zod.number(),
+  "profit": zod.number(),
+  "status": zod.string(),
+  "referralCode": zod.string(),
+  "referredBy": zod.string().nullish(),
+  "createdAt": zod.string()
+})
+
+
+/**
+ * @summary Update current user profile
+ */
+export const UpdateUserMeBody = zod.object({
+  "firstName": zod.string().optional(),
+  "lastName": zod.string().optional(),
+  "phone": zod.string().optional(),
+  "country": zod.string().optional()
+})
+
+export const UpdateUserMeResponse = zod.object({
+  "id": zod.number(),
+  "email": zod.string(),
+  "firstName": zod.string(),
+  "lastName": zod.string(),
+  "phone": zod.string().nullish(),
+  "country": zod.string().nullish(),
+  "balance": zod.number(),
+  "profit": zod.number(),
+  "status": zod.string(),
+  "referralCode": zod.string(),
+  "referredBy": zod.string().nullish(),
+  "createdAt": zod.string()
+})
+
+
+/**
+ * @summary Get current user transactions
+ */
+export const GetUserTransactionsResponseItem = zod.object({
+  "id": zod.number(),
+  "userId": zod.number(),
+  "userEmail": zod.string().nullish(),
+  "type": zod.string(),
+  "amount": zod.number(),
+  "status": zod.string(),
+  "description": zod.string().nullish(),
+  "createdAt": zod.string()
+})
+export const GetUserTransactionsResponse = zod.array(GetUserTransactionsResponseItem)
+
+
+/**
+ * @summary Get current user deposits
+ */
+export const GetUserDepositsResponseItem = zod.object({
+  "id": zod.number(),
+  "userId": zod.number(),
+  "userEmail": zod.string().nullish(),
+  "userName": zod.string().nullish(),
+  "amount": zod.number(),
+  "method": zod.string(),
+  "txHash": zod.string().nullish(),
+  "status": zod.string(),
+  "adminNote": zod.string().nullish(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string().optional()
+})
+export const GetUserDepositsResponse = zod.array(GetUserDepositsResponseItem)
+
+
+/**
+ * @summary Get current user withdrawals
+ */
+export const GetUserWithdrawalsResponseItem = zod.object({
+  "id": zod.number(),
+  "userId": zod.number(),
+  "userEmail": zod.string().nullish(),
+  "userName": zod.string().nullish(),
+  "amount": zod.number(),
+  "method": zod.string(),
+  "walletAddress": zod.string(),
+  "status": zod.string(),
+  "adminNote": zod.string().nullish(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string().optional()
+})
+export const GetUserWithdrawalsResponse = zod.array(GetUserWithdrawalsResponseItem)
+
+
+/**
+ * @summary Get current user loan applications
+ */
+export const GetUserLoansResponseItem = zod.object({
+  "id": zod.number(),
+  "userId": zod.number(),
+  "userEmail": zod.string().nullish(),
+  "userName": zod.string().nullish(),
+  "amount": zod.number(),
+  "purpose": zod.string(),
+  "status": zod.string(),
+  "adminNote": zod.string().nullish(),
+  "createdAt": zod.string()
+})
+export const GetUserLoansResponse = zod.array(GetUserLoansResponseItem)
+
+
+/**
+ * @summary Apply for a loan
+ */
+export const ApplyForLoanBody = zod.object({
+  "userId": zod.number(),
+  "amount": zod.number(),
+  "purpose": zod.string()
+})
+
+
+/**
+ * @summary Get available investment plans (public)
+ */
+export const GetUserPlansResponseItem = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "minAmount": zod.number(),
+  "maxAmount": zod.number(),
+  "roiPercent": zod.number(),
+  "durationDays": zod.number(),
+  "description": zod.string().nullish(),
+  "active": zod.boolean()
+})
+export const GetUserPlansResponse = zod.array(GetUserPlansResponseItem)
+
+
+/**
+ * @summary Get active payment methods for deposits
+ */
+export const GetUserPaymentMethodsResponseItem = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "type": zod.string(),
+  "walletAddress": zod.string(),
+  "network": zod.string().nullish(),
+  "qrCode": zod.string().nullish(),
+  "active": zod.boolean(),
+  "instructions": zod.string().nullish()
+})
+export const GetUserPaymentMethodsResponse = zod.array(GetUserPaymentMethodsResponseItem)
+
+
+/**
+ * @summary Get portfolio summary for current user
+ */
+export const GetUserPortfolioResponse = zod.object({
+  "balance": zod.number(),
+  "profit": zod.number(),
+  "totalDeposited": zod.number(),
+  "totalWithdrawn": zod.number(),
+  "activeLoans": zod.number(),
+  "pendingDeposits": zod.number().optional(),
+  "pendingWithdrawals": zod.number().optional()
+})
+
+
+/**
+ * @summary Submit KYC verification documents
+ */
+export const SubmitKycBody = zod.object({
+  "userId": zod.number(),
+  "documentType": zod.string(),
+  "documentNumber": zod.string(),
+  "country": zod.string().optional()
+})
+
+export const SubmitKycResponse = zod.object({
+  "id": zod.number(),
+  "email": zod.string(),
+  "firstName": zod.string(),
+  "lastName": zod.string(),
+  "phone": zod.string().nullish(),
+  "country": zod.string().nullish(),
+  "balance": zod.number(),
+  "profit": zod.number(),
+  "status": zod.string(),
+  "referralCode": zod.string(),
+  "referredBy": zod.string().nullish(),
+  "createdAt": zod.string()
+})
+
+

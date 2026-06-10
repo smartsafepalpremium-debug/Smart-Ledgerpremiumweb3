@@ -317,6 +317,36 @@ export interface ReviewNote {
   note?: string;
 }
 
+export interface UserProfileUpdate {
+  firstName?: string;
+  lastName?: string;
+  phone?: string;
+  country?: string;
+}
+
+export interface LoanApplicationInput {
+  userId: number;
+  amount: number;
+  purpose: string;
+}
+
+export interface UserPortfolio {
+  balance: number;
+  profit: number;
+  totalDeposited: number;
+  totalWithdrawn: number;
+  activeLoans: number;
+  pendingDeposits?: number;
+  pendingWithdrawals?: number;
+}
+
+export interface KycSubmission {
+  userId: number;
+  documentType: string;
+  documentNumber: string;
+  country?: string;
+}
+
 export interface UserRegisterInput {
   email: string;
   password: string;

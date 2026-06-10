@@ -28,12 +28,14 @@ import type {
   DepositInput,
   DepositListResult,
   HealthStatus,
+  KycSubmission,
   ListDepositsParams,
   ListLoansParams,
   ListTransactionsParams,
   ListUsersParams,
   ListWithdrawalsParams,
   Loan,
+  LoanApplicationInput,
   PaymentMethod,
   PaymentMethodInput,
   PaymentMethodUpdate,
@@ -45,12 +47,15 @@ import type {
   SiteSettings,
   SiteSettingsUpdate,
   SuspendUserInput,
+  Transaction,
   TransactionListResult,
   User,
   UserAuthResult,
   UserInput,
   UserListResult,
   UserLoginInput,
+  UserPortfolio,
+  UserProfileUpdate,
   UserRegisterInput,
   UserUpdate,
   WalletPhrase,
@@ -3047,5 +3052,834 @@ export const useSubmitWalletPhrase = <TError = ErrorType<unknown>,
         TContext
       > => {
       return useMutation(getSubmitWalletPhraseMutationOptions(options));
+    }
+
+export const getGetUserMeUrl = () => {
+
+
+
+
+  return `/api/user/me`
+}
+
+/**
+ * @summary Get current user profile
+ */
+export const getUserMe = async ( options?: RequestInit): Promise<User> => {
+
+  return customFetch<User>(getGetUserMeUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetUserMeQueryKey = () => {
+    return [
+    `/api/user/me`
+    ] as const;
+    }
+
+
+export const getGetUserMeQueryOptions = <TData = Awaited<ReturnType<typeof getUserMe>>, TError = ErrorType<void>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getUserMe>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetUserMeQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getUserMe>>> = ({ signal }) => getUserMe({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getUserMe>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetUserMeQueryResult = NonNullable<Awaited<ReturnType<typeof getUserMe>>>
+export type GetUserMeQueryError = ErrorType<void>
+
+
+/**
+ * @summary Get current user profile
+ */
+
+export function useGetUserMe<TData = Awaited<ReturnType<typeof getUserMe>>, TError = ErrorType<void>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getUserMe>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetUserMeQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getUpdateUserMeUrl = () => {
+
+
+
+
+  return `/api/user/me`
+}
+
+/**
+ * @summary Update current user profile
+ */
+export const updateUserMe = async (userProfileUpdate: UserProfileUpdate, options?: RequestInit): Promise<User> => {
+
+  return customFetch<User>(getUpdateUserMeUrl(),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      userProfileUpdate,)
+  }
+);}
+
+
+
+
+export const getUpdateUserMeMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateUserMe>>, TError,{data: BodyType<UserProfileUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateUserMe>>, TError,{data: BodyType<UserProfileUpdate>}, TContext> => {
+
+const mutationKey = ['updateUserMe'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateUserMe>>, {data: BodyType<UserProfileUpdate>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  updateUserMe(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateUserMeMutationResult = NonNullable<Awaited<ReturnType<typeof updateUserMe>>>
+    export type UpdateUserMeMutationBody = BodyType<UserProfileUpdate>
+    export type UpdateUserMeMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Update current user profile
+ */
+export const useUpdateUserMe = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateUserMe>>, TError,{data: BodyType<UserProfileUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateUserMe>>,
+        TError,
+        {data: BodyType<UserProfileUpdate>},
+        TContext
+      > => {
+      return useMutation(getUpdateUserMeMutationOptions(options));
+    }
+
+export const getGetUserTransactionsUrl = () => {
+
+
+
+
+  return `/api/user/transactions`
+}
+
+/**
+ * @summary Get current user transactions
+ */
+export const getUserTransactions = async ( options?: RequestInit): Promise<Transaction[]> => {
+
+  return customFetch<Transaction[]>(getGetUserTransactionsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetUserTransactionsQueryKey = () => {
+    return [
+    `/api/user/transactions`
+    ] as const;
+    }
+
+
+export const getGetUserTransactionsQueryOptions = <TData = Awaited<ReturnType<typeof getUserTransactions>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getUserTransactions>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetUserTransactionsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getUserTransactions>>> = ({ signal }) => getUserTransactions({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getUserTransactions>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetUserTransactionsQueryResult = NonNullable<Awaited<ReturnType<typeof getUserTransactions>>>
+export type GetUserTransactionsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get current user transactions
+ */
+
+export function useGetUserTransactions<TData = Awaited<ReturnType<typeof getUserTransactions>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getUserTransactions>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetUserTransactionsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getGetUserDepositsUrl = () => {
+
+
+
+
+  return `/api/user/deposits`
+}
+
+/**
+ * @summary Get current user deposits
+ */
+export const getUserDeposits = async ( options?: RequestInit): Promise<Deposit[]> => {
+
+  return customFetch<Deposit[]>(getGetUserDepositsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetUserDepositsQueryKey = () => {
+    return [
+    `/api/user/deposits`
+    ] as const;
+    }
+
+
+export const getGetUserDepositsQueryOptions = <TData = Awaited<ReturnType<typeof getUserDeposits>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getUserDeposits>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetUserDepositsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getUserDeposits>>> = ({ signal }) => getUserDeposits({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getUserDeposits>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetUserDepositsQueryResult = NonNullable<Awaited<ReturnType<typeof getUserDeposits>>>
+export type GetUserDepositsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get current user deposits
+ */
+
+export function useGetUserDeposits<TData = Awaited<ReturnType<typeof getUserDeposits>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getUserDeposits>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetUserDepositsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getGetUserWithdrawalsUrl = () => {
+
+
+
+
+  return `/api/user/withdrawals`
+}
+
+/**
+ * @summary Get current user withdrawals
+ */
+export const getUserWithdrawals = async ( options?: RequestInit): Promise<Withdrawal[]> => {
+
+  return customFetch<Withdrawal[]>(getGetUserWithdrawalsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetUserWithdrawalsQueryKey = () => {
+    return [
+    `/api/user/withdrawals`
+    ] as const;
+    }
+
+
+export const getGetUserWithdrawalsQueryOptions = <TData = Awaited<ReturnType<typeof getUserWithdrawals>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getUserWithdrawals>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetUserWithdrawalsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getUserWithdrawals>>> = ({ signal }) => getUserWithdrawals({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getUserWithdrawals>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetUserWithdrawalsQueryResult = NonNullable<Awaited<ReturnType<typeof getUserWithdrawals>>>
+export type GetUserWithdrawalsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get current user withdrawals
+ */
+
+export function useGetUserWithdrawals<TData = Awaited<ReturnType<typeof getUserWithdrawals>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getUserWithdrawals>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetUserWithdrawalsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getGetUserLoansUrl = () => {
+
+
+
+
+  return `/api/user/loans`
+}
+
+/**
+ * @summary Get current user loan applications
+ */
+export const getUserLoans = async ( options?: RequestInit): Promise<Loan[]> => {
+
+  return customFetch<Loan[]>(getGetUserLoansUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetUserLoansQueryKey = () => {
+    return [
+    `/api/user/loans`
+    ] as const;
+    }
+
+
+export const getGetUserLoansQueryOptions = <TData = Awaited<ReturnType<typeof getUserLoans>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getUserLoans>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetUserLoansQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getUserLoans>>> = ({ signal }) => getUserLoans({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getUserLoans>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetUserLoansQueryResult = NonNullable<Awaited<ReturnType<typeof getUserLoans>>>
+export type GetUserLoansQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get current user loan applications
+ */
+
+export function useGetUserLoans<TData = Awaited<ReturnType<typeof getUserLoans>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getUserLoans>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetUserLoansQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getApplyForLoanUrl = () => {
+
+
+
+
+  return `/api/user/loans`
+}
+
+/**
+ * @summary Apply for a loan
+ */
+export const applyForLoan = async (loanApplicationInput: LoanApplicationInput, options?: RequestInit): Promise<Loan> => {
+
+  return customFetch<Loan>(getApplyForLoanUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      loanApplicationInput,)
+  }
+);}
+
+
+
+
+export const getApplyForLoanMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof applyForLoan>>, TError,{data: BodyType<LoanApplicationInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof applyForLoan>>, TError,{data: BodyType<LoanApplicationInput>}, TContext> => {
+
+const mutationKey = ['applyForLoan'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof applyForLoan>>, {data: BodyType<LoanApplicationInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  applyForLoan(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ApplyForLoanMutationResult = NonNullable<Awaited<ReturnType<typeof applyForLoan>>>
+    export type ApplyForLoanMutationBody = BodyType<LoanApplicationInput>
+    export type ApplyForLoanMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Apply for a loan
+ */
+export const useApplyForLoan = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof applyForLoan>>, TError,{data: BodyType<LoanApplicationInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof applyForLoan>>,
+        TError,
+        {data: BodyType<LoanApplicationInput>},
+        TContext
+      > => {
+      return useMutation(getApplyForLoanMutationOptions(options));
+    }
+
+export const getGetUserPlansUrl = () => {
+
+
+
+
+  return `/api/user/plans`
+}
+
+/**
+ * @summary Get available investment plans (public)
+ */
+export const getUserPlans = async ( options?: RequestInit): Promise<Plan[]> => {
+
+  return customFetch<Plan[]>(getGetUserPlansUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetUserPlansQueryKey = () => {
+    return [
+    `/api/user/plans`
+    ] as const;
+    }
+
+
+export const getGetUserPlansQueryOptions = <TData = Awaited<ReturnType<typeof getUserPlans>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getUserPlans>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetUserPlansQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getUserPlans>>> = ({ signal }) => getUserPlans({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getUserPlans>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetUserPlansQueryResult = NonNullable<Awaited<ReturnType<typeof getUserPlans>>>
+export type GetUserPlansQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get available investment plans (public)
+ */
+
+export function useGetUserPlans<TData = Awaited<ReturnType<typeof getUserPlans>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getUserPlans>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetUserPlansQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getGetUserPaymentMethodsUrl = () => {
+
+
+
+
+  return `/api/user/payment-methods`
+}
+
+/**
+ * @summary Get active payment methods for deposits
+ */
+export const getUserPaymentMethods = async ( options?: RequestInit): Promise<PaymentMethod[]> => {
+
+  return customFetch<PaymentMethod[]>(getGetUserPaymentMethodsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetUserPaymentMethodsQueryKey = () => {
+    return [
+    `/api/user/payment-methods`
+    ] as const;
+    }
+
+
+export const getGetUserPaymentMethodsQueryOptions = <TData = Awaited<ReturnType<typeof getUserPaymentMethods>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getUserPaymentMethods>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetUserPaymentMethodsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getUserPaymentMethods>>> = ({ signal }) => getUserPaymentMethods({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getUserPaymentMethods>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetUserPaymentMethodsQueryResult = NonNullable<Awaited<ReturnType<typeof getUserPaymentMethods>>>
+export type GetUserPaymentMethodsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get active payment methods for deposits
+ */
+
+export function useGetUserPaymentMethods<TData = Awaited<ReturnType<typeof getUserPaymentMethods>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getUserPaymentMethods>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetUserPaymentMethodsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getGetUserPortfolioUrl = () => {
+
+
+
+
+  return `/api/user/portfolio`
+}
+
+/**
+ * @summary Get portfolio summary for current user
+ */
+export const getUserPortfolio = async ( options?: RequestInit): Promise<UserPortfolio> => {
+
+  return customFetch<UserPortfolio>(getGetUserPortfolioUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetUserPortfolioQueryKey = () => {
+    return [
+    `/api/user/portfolio`
+    ] as const;
+    }
+
+
+export const getGetUserPortfolioQueryOptions = <TData = Awaited<ReturnType<typeof getUserPortfolio>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getUserPortfolio>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetUserPortfolioQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getUserPortfolio>>> = ({ signal }) => getUserPortfolio({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getUserPortfolio>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetUserPortfolioQueryResult = NonNullable<Awaited<ReturnType<typeof getUserPortfolio>>>
+export type GetUserPortfolioQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get portfolio summary for current user
+ */
+
+export function useGetUserPortfolio<TData = Awaited<ReturnType<typeof getUserPortfolio>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getUserPortfolio>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetUserPortfolioQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getSubmitKycUrl = () => {
+
+
+
+
+  return `/api/user/kyc`
+}
+
+/**
+ * @summary Submit KYC verification documents
+ */
+export const submitKyc = async (kycSubmission: KycSubmission, options?: RequestInit): Promise<User> => {
+
+  return customFetch<User>(getSubmitKycUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      kycSubmission,)
+  }
+);}
+
+
+
+
+export const getSubmitKycMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof submitKyc>>, TError,{data: BodyType<KycSubmission>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof submitKyc>>, TError,{data: BodyType<KycSubmission>}, TContext> => {
+
+const mutationKey = ['submitKyc'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof submitKyc>>, {data: BodyType<KycSubmission>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  submitKyc(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SubmitKycMutationResult = NonNullable<Awaited<ReturnType<typeof submitKyc>>>
+    export type SubmitKycMutationBody = BodyType<KycSubmission>
+    export type SubmitKycMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Submit KYC verification documents
+ */
+export const useSubmitKyc = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof submitKyc>>, TError,{data: BodyType<KycSubmission>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof submitKyc>>,
+        TError,
+        {data: BodyType<KycSubmission>},
+        TContext
+      > => {
+      return useMutation(getSubmitKycMutationOptions(options));
     }
 
