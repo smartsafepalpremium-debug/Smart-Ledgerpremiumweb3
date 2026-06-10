@@ -921,6 +921,35 @@ export const GetUserPlansResponse = zod.array(GetUserPlansResponseItem)
 
 
 /**
+ * @summary Invest in a plan
+ */
+export const CreateInvestmentBody = zod.object({
+  "userId": zod.number(),
+  "planId": zod.number(),
+  "amount": zod.number()
+})
+
+
+/**
+ * @summary Get user's investments
+ */
+export const GetUserInvestmentsResponseItem = zod.object({
+  "id": zod.number(),
+  "userId": zod.number(),
+  "planId": zod.number(),
+  "planName": zod.string(),
+  "amount": zod.number(),
+  "roiPercent": zod.number(),
+  "durationDays": zod.number(),
+  "expectedReturn": zod.number(),
+  "status": zod.string(),
+  "maturesAt": zod.string(),
+  "createdAt": zod.string()
+})
+export const GetUserInvestmentsResponse = zod.array(GetUserInvestmentsResponseItem)
+
+
+/**
  * @summary Get active payment methods for deposits
  */
 export const GetUserPaymentMethodsResponseItem = zod.object({

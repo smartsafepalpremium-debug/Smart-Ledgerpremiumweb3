@@ -357,6 +357,26 @@ export interface UserRegisterInput {
   referralCode?: string;
 }
 
+export interface Investment {
+  id: number;
+  userId: number;
+  planId: number;
+  planName: string;
+  amount: number;
+  roiPercent: number;
+  durationDays: number;
+  expectedReturn: number;
+  status: string;
+  maturesAt: string;
+  createdAt: string;
+}
+
+export interface InvestmentInput {
+  userId: number;
+  planId: number;
+  amount: number;
+}
+
 export interface UserLoginInput {
   email: string;
   password: string;
@@ -419,4 +439,8 @@ export const ListLoansStatus = {
   approved: 'approved',
   rejected: 'rejected',
 } as const;
+
+export type CreateInvestment400 = {
+  error?: string;
+};
 

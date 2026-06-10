@@ -4,6 +4,7 @@ export * from "./withdrawals";
 export * from "./transactions";
 export * from "./plans";
 export * from "./loans";
+export * from "./investments";
 export * from "./payment_methods";
 export * from "./settings";
 export * from "./referrals";

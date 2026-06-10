@@ -3,7 +3,7 @@ import type { Request, Response } from "express";
 import { eq, desc, and } from "drizzle-orm";
 import {
   db, usersTable, depositsTable, withdrawalsTable, transactionsTable,
-  loansTable, plansTable, paymentMethodsTable,
+  loansTable, plansTable, paymentMethodsTable, investmentsTable,
 } from "@workspace/db";
 import { requireUser } from "../middlewares/auth";
 
@@ -137,6 +137,84 @@ router.post("/loans", async (req: Request, res: Response) => {
     });
   } catch (err) {
     req.log.error({ err }, "applyForLoan error");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// POST /user/invest
+router.post("/invest", requireUser, async (req: Request, res: Response) => {
+  const { userId } = (req as AuthedReq).user;
+  const { planId, amount } = req.body as { planId: number; amount: number };
+  try {
+    if (!planId || !amount || amount <= 0) {
+      res.status(400).json({ error: "Invalid investment request" }); return;
+    }
+    const [plan] = await db.select().from(plansTable).where(and(eq(plansTable.id, planId), eq(plansTable.active, true)));
+    if (!plan) { res.status(400).json({ error: "Plan not found or inactive" }); return; }
+    if (amount < plan.minAmount) {
+      res.status(400).json({ error: `Minimum investment is $${plan.minAmount}` }); return;
+    }
+    if (plan.maxAmount && amount > plan.maxAmount) {
+      res.status(400).json({ error: `Maximum investment is $${plan.maxAmount}` }); return;
+    }
+    const [user] = await db.select().from(usersTable).where(eq(usersTable.id, userId));
+    if (!user) { res.status(404).json({ error: "User not found" }); return; }
+    if ((user.balance ?? 0) < amount) {
+      res.status(400).json({ error: "Insufficient balance" }); return;
+    }
+    const maturesAt = new Date();
+    maturesAt.setDate(maturesAt.getDate() + plan.durationDays);
+    const expectedReturn = Math.round(amount * (1 + plan.roiPercent / 100) * 100) / 100;
+
+    const [investment] = await db.insert(investmentsTable).values({
+      userId,
+      planId: plan.id,
+      planName: plan.name,
+      amount,
+      roiPercent: plan.roiPercent,
+      durationDays: plan.durationDays,
+      expectedReturn,
+      status: "active",
+      maturesAt,
+    }).returning();
+
+    await db.update(usersTable).set({ balance: (user.balance ?? 0) - amount }).where(eq(usersTable.id, userId));
+    await db.insert(transactionsTable).values({
+      userId,
+      type: "investment",
+      amount: -amount,
+      status: "completed",
+      description: `Invested in ${plan.name} plan`,
+    });
+
+    res.status(201).json({
+      id: investment!.id, userId: investment!.userId, planId: investment!.planId,
+      planName: investment!.planName, amount: investment!.amount, roiPercent: investment!.roiPercent,
+      durationDays: investment!.durationDays, expectedReturn: investment!.expectedReturn,
+      status: investment!.status, maturesAt: investment!.maturesAt.toISOString(),
+      createdAt: investment!.createdAt.toISOString(),
+    });
+  } catch (err) {
+    req.log.error({ err }, "createInvestment error");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// GET /user/investments
+router.get("/investments", requireUser, async (req: Request, res: Response) => {
+  const { userId } = (req as AuthedReq).user;
+  try {
+    const rows = await db.select().from(investmentsTable)
+      .where(eq(investmentsTable.userId, userId))
+      .orderBy(desc(investmentsTable.createdAt));
+    res.json(rows.map(inv => ({
+      id: inv.id, userId: inv.userId, planId: inv.planId, planName: inv.planName,
+      amount: inv.amount, roiPercent: inv.roiPercent, durationDays: inv.durationDays,
+      expectedReturn: inv.expectedReturn, status: inv.status,
+      maturesAt: inv.maturesAt.toISOString(), createdAt: inv.createdAt.toISOString(),
+    })));
+  } catch (err) {
+    req.log.error({ err }, "getUserInvestments error");
     res.status(500).json({ error: "Internal server error" });
   }
 });

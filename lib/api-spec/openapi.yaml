@@ -929,6 +929,48 @@ paths:
                 items:
                   $ref: "#/components/schemas/Plan"
 
+  /user/invest:
+    post:
+      operationId: createInvestment
+      tags: [user-actions]
+      summary: Invest in a plan
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InvestmentInput"
+      responses:
+        "201":
+          description: Investment created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Investment"
+        "400":
+          description: Insufficient balance or invalid plan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error: { type: string }
+
+  /user/investments:
+    get:
+      operationId: getUserInvestments
+      tags: [user-actions]
+      summary: Get user's investments
+      responses:
+        "200":
+          description: Investment list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Investment"
+
   /user/payment-methods:
     get:
       operationId: getUserPaymentMethods
@@ -1387,6 +1429,30 @@ components:
         phone: { type: string }
         country: { type: string }
         referralCode: { type: string }
+
+    Investment:
+      type: object
+      required: [id, userId, planId, planName, amount, roiPercent, durationDays, expectedReturn, status, maturesAt, createdAt]
+      properties:
+        id: { type: integer }
+        userId: { type: integer }
+        planId: { type: integer }
+        planName: { type: string }
+        amount: { type: number }
+        roiPercent: { type: number }
+        durationDays: { type: integer }
+        expectedReturn: { type: number }
+        status: { type: string }
+        maturesAt: { type: string }
+        createdAt: { type: string }
+
+    InvestmentInput:
+      type: object
+      required: [userId, planId, amount]
+      properties:
+        userId: { type: integer }
+        planId: { type: integer }
+        amount: { type: number }
 
     UserLoginInput:
       type: object
