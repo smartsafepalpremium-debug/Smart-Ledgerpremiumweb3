@@ -3,6 +3,7 @@ import type { Request, Response } from "express";
 import { eq } from "drizzle-orm";
 import { db, settingsTable } from "@workspace/db";
 import { requireAdmin } from "../middlewares/auth";
+import { sendTestEmail } from "../lib/email";
 
 const router = Router();
 router.use(requireAdmin);
@@ -39,6 +40,23 @@ router.patch("/", async (req: Request, res: Response) => {
   } catch (err) {
     req.log.error({ err }, "updateSettings error");
     res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.post("/test-email", async (req: Request, res: Response) => {
+  try {
+    const body = req.body as { to?: string };
+    const [settings] = await db.select().from(settingsTable).limit(1);
+    const to = body.to || settings?.adminEmail || "smartsafepalpremium@gmail.com";
+    const result = await sendTestEmail(to);
+    if (result.ok) {
+      res.json({ ok: true, message: `Test email sent to ${to}` });
+    } else {
+      res.status(400).json({ ok: false, error: result.error });
+    }
+  } catch (err) {
+    req.log.error({ err }, "testEmail error");
+    res.status(500).json({ ok: false, error: "Internal server error" });
   }
 });
 
