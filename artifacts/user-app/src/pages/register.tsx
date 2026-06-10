@@ -54,11 +54,11 @@ export default function Register() {
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <label className="text-sm font-medium text-foreground">First name</label>
-                <input value={form.firstName} onChange={set("firstName")} className="w-full h-10 px-3 rounded-lg bg-input border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" placeholder="John" required />
+                <input value={form.firstName} onChange={set("firstName")} className="w-full h-10 px-3 rounded-lg bg-input border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" placeholder="First name" required />
               </div>
               <div className="space-y-1.5">
                 <label className="text-sm font-medium text-foreground">Last name</label>
-                <input value={form.lastName} onChange={set("lastName")} className="w-full h-10 px-3 rounded-lg bg-input border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" placeholder="Doe" required />
+                <input value={form.lastName} onChange={set("lastName")} className="w-full h-10 px-3 rounded-lg bg-input border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" placeholder="Last name" required />
               </div>
             </div>
             <div className="space-y-1.5">
