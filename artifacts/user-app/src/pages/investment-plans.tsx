@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "wouter";
 import { useGetUserPlans, useCreateInvestment, useGetUserInvestments } from "@workspace/api-client-react";
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { useAuth } from "@/contexts/auth-context";
@@ -243,11 +244,44 @@ export default function InvestmentPlans() {
             </div>
 
             {/* Balance */}
-            <div className="bg-white/5 rounded-lg px-4 py-3 mb-4 flex justify-between items-center">
+            <div className={`rounded-lg px-4 py-3 mb-4 flex justify-between items-center ${(user?.balance ?? 0) < dialog.plan.minAmount ? "bg-yellow-400/10 border border-yellow-400/20" : "bg-white/5"}`}>
               <span className="text-xs text-muted-foreground">Available balance</span>
-              <span className="text-sm font-semibold text-foreground">{fmtFull(user?.balance ?? 0)}</span>
+              <span className={`text-sm font-semibold ${(user?.balance ?? 0) < dialog.plan.minAmount ? "text-yellow-400" : "text-foreground"}`}>
+                {fmtFull(user?.balance ?? 0)}
+              </span>
             </div>
 
+            {/* Insufficient balance — show deposit CTA */}
+            {(user?.balance ?? 0) < dialog.plan.minAmount ? (
+              <div className="space-y-3">
+                <div className="bg-yellow-400/10 border border-yellow-400/20 rounded-xl px-4 py-4 text-center space-y-1.5">
+                  <svg className="w-8 h-8 text-yellow-400 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                  </svg>
+                  <p className="text-sm font-semibold text-yellow-400">Insufficient balance</p>
+                  <p className="text-xs text-muted-foreground">
+                    You need at least <span className="text-foreground font-medium">{fmt(dialog.plan.minAmount)}</span> to invest in this plan.
+                    Your balance is <span className="text-foreground font-medium">{fmtFull(user?.balance ?? 0)}</span>.
+                  </p>
+                </div>
+                <Link
+                  href="/deposit"
+                  onClick={() => setDialog(null)}
+                  className="flex items-center justify-center gap-2 w-full h-10 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-colors"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                  </svg>
+                  Make a Deposit
+                </Link>
+                <button
+                  onClick={() => setDialog(null)}
+                  className="w-full h-9 rounded-lg border border-border text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            ) : (
             <form onSubmit={handleInvest} className="space-y-4">
               {error && (
                 <div className="bg-destructive/10 border border-destructive/30 rounded-lg px-3 py-2 text-xs text-destructive">
@@ -301,6 +335,7 @@ export default function InvestmentPlans() {
                 {isPending ? "Processing..." : `Confirm Investment`}
               </button>
             </form>
+            )}
           </div>
         </div>
       )}
