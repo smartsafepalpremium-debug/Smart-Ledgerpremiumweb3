@@ -3,28 +3,39 @@ import type { Request, Response } from "express";
 import { eq, sql } from "drizzle-orm";
 import { db, referralsTable, usersTable } from "@workspace/db";
 import { requireAdmin } from "../middlewares/auth";
+import { alias } from "drizzle-orm/pg-core";
 
 const router = Router();
 router.use(requireAdmin);
 
 router.get("/", async (req: Request, res: Response) => {
   try {
-    const referrers = usersTable;
-    const referred = { ...usersTable };
+    const referrerUsers = alias(usersTable, "referrer_users");
+    const referredUsers = alias(usersTable, "referred_users");
 
-    const rows = await db.execute(sql`
-      SELECT r.id, r.referrer_id, r.referred_id, r.bonus_amount, r.created_at,
-             ru.email as referrer_email, rd.email as referred_email
-      FROM referrals r
-      LEFT JOIN users ru ON ru.id = r.referrer_id
-      LEFT JOIN users rd ON rd.id = r.referred_id
-      ORDER BY r.created_at DESC
-    `);
+    const rows = await db
+      .select({
+        id: referralsTable.id,
+        referrerId: referralsTable.referrerId,
+        referredId: referralsTable.referredId,
+        bonusAmount: referralsTable.bonusAmount,
+        createdAt: referralsTable.createdAt,
+        referrerEmail: referrerUsers.email,
+        referredEmail: referredUsers.email,
+      })
+      .from(referralsTable)
+      .leftJoin(referrerUsers, eq(referralsTable.referrerId, referrerUsers.id))
+      .leftJoin(referredUsers, eq(referralsTable.referredId, referredUsers.id))
+      .orderBy(sql`${referralsTable.createdAt} desc`);
 
-    res.json((rows as unknown as Array<Record<string, unknown>>).map(r => ({
-      id: r["id"], referrerId: r["referrer_id"], referrerEmail: r["referrer_email"] ?? null,
-      referredId: r["referred_id"], referredEmail: r["referred_email"] ?? null,
-      bonusAmount: r["bonus_amount"], createdAt: r["created_at"],
+    res.json(rows.map(r => ({
+      id: r.id,
+      referrerId: r.referrerId,
+      referrerEmail: r.referrerEmail ?? null,
+      referredId: r.referredId,
+      referredEmail: r.referredEmail ?? null,
+      bonusAmount: r.bonusAmount,
+      createdAt: r.createdAt.toISOString(),
     })));
   } catch (err) {
     req.log.error({ err }, "listReferrals error");

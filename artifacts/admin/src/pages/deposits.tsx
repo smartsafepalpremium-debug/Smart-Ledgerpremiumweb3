@@ -36,20 +36,28 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Check, X } from "lucide-react";
+import { Check, X, ChevronLeft, ChevronRight } from "lucide-react";
+
+const LIMIT = 20;
 
 export default function Deposits() {
   const [statusFilter, setStatusFilter] = useState<ListDepositsStatus | "all">("pending");
+  const [page, setPage] = useState(1);
   const [actionConfirm, setActionConfirm] = useState<{ id: number; type: "approve" | "reject" } | null>(null);
   
   const queryClient = useQueryClient();
   const { toast } = useToast();
   
-  const queryParams = statusFilter === "all" ? {} : { status: statusFilter };
+  const queryParams = {
+    page,
+    ...(statusFilter !== "all" ? { status: statusFilter } : {}),
+  };
   const { data, isLoading } = useListDeposits(queryParams);
   
   const approveDeposit = useApproveDeposit();
   const rejectDeposit = useRejectDeposit();
+
+  const totalPages = data ? Math.ceil(data.total / LIMIT) : 1;
 
   const handleAction = () => {
     if (!actionConfirm) return;
@@ -61,6 +69,10 @@ export default function Deposits() {
         queryClient.invalidateQueries({ queryKey: getListDepositsQueryKey(queryParams) });
         queryClient.invalidateQueries({ queryKey: ["/api/admin/stats"] });
         toast({ title: `Deposit ${actionConfirm.type}d successfully` });
+        setActionConfirm(null);
+      },
+      onError: () => {
+        toast({ title: `Failed to ${actionConfirm.type} deposit`, variant: "destructive" });
         setActionConfirm(null);
       }
     });
@@ -74,7 +86,7 @@ export default function Deposits() {
           <p className="text-muted-foreground mt-1">Review and process user funding transactions.</p>
         </div>
         <div className="flex items-center gap-2">
-          <Select value={statusFilter} onValueChange={(val: any) => setStatusFilter(val)}>
+          <Select value={statusFilter} onValueChange={(val: any) => { setStatusFilter(val); setPage(1); }}>
             <SelectTrigger className="w-[180px] bg-card/50">
               <SelectValue placeholder="Filter by status" />
             </SelectTrigger>
@@ -125,10 +137,10 @@ export default function Deposits() {
                       {deposit.method}
                     </Badge>
                   </TableCell>
-                  <TableCell className="font-mono text-xs text-muted-foreground max-w-[200px] truncate">
-                    {deposit.txHash || '-'}
+                  <TableCell className="font-mono text-xs text-muted-foreground max-w-[160px] truncate">
+                    {deposit.txHash || '—'}
                   </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
+                  <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
                     {format(new Date(deposit.createdAt), "MMM d, yyyy HH:mm")}
                   </TableCell>
                   <TableCell>
@@ -167,6 +179,21 @@ export default function Deposits() {
           </TableBody>
         </Table>
       </div>
+
+      {data && data.total > LIMIT && (
+        <div className="flex items-center justify-between text-sm text-muted-foreground">
+          <span>Showing {((page - 1) * LIMIT) + 1}–{Math.min(page * LIMIT, data.total)} of {data.total}</span>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage(p => p - 1)}>
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <span className="px-2">{page} / {totalPages}</span>
+            <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPage(p => p + 1)}>
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      )}
 
       <AlertDialog open={!!actionConfirm} onOpenChange={() => setActionConfirm(null)}>
         <AlertDialogContent>

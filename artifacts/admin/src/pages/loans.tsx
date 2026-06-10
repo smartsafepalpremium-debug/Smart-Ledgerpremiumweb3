@@ -36,20 +36,25 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Check, X } from "lucide-react";
+import { Check, X, ChevronLeft, ChevronRight } from "lucide-react";
+
+const LIMIT = 20;
 
 export default function Loans() {
   const [statusFilter, setStatusFilter] = useState<ListLoansStatus | "all">("pending");
+  const [page, setPage] = useState(1);
   const [actionConfirm, setActionConfirm] = useState<{ id: number; type: "approve" | "reject" } | null>(null);
   
   const queryClient = useQueryClient();
   const { toast } = useToast();
   
-  const queryParams = statusFilter === "all" ? {} : { status: statusFilter };
+  const queryParams = statusFilter === "all" ? { page } : { status: statusFilter, page };
   const { data, isLoading } = useListLoans(queryParams);
   
   const approveLoan = useApproveLoan();
   const rejectLoan = useRejectLoan();
+
+  const totalPages = Array.isArray(data) ? 1 : 1;
 
   const handleAction = () => {
     if (!actionConfirm) return;
@@ -62,9 +67,15 @@ export default function Loans() {
         queryClient.invalidateQueries({ queryKey: ["/api/admin/stats"] });
         toast({ title: `Loan ${actionConfirm.type}d successfully` });
         setActionConfirm(null);
+      },
+      onError: () => {
+        toast({ title: `Failed to ${actionConfirm.type} loan`, variant: "destructive" });
+        setActionConfirm(null);
       }
     });
   };
+
+  const loans = Array.isArray(data) ? data : [];
 
   return (
     <div className="space-y-6">
@@ -74,7 +85,7 @@ export default function Loans() {
           <p className="text-muted-foreground mt-1">Review user credit and margin requests.</p>
         </div>
         <div className="flex items-center gap-2">
-          <Select value={statusFilter} onValueChange={(val: any) => setStatusFilter(val)}>
+          <Select value={statusFilter} onValueChange={(val: any) => { setStatusFilter(val); setPage(1); }}>
             <SelectTrigger className="w-[180px] bg-card/50">
               <SelectValue placeholder="Filter by status" />
             </SelectTrigger>
@@ -105,12 +116,12 @@ export default function Loans() {
               <TableRow>
                 <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Loading applications...</TableCell>
               </TableRow>
-            ) : !data?.length ? (
+            ) : loans.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">No applications found.</TableCell>
               </TableRow>
             ) : (
-              data?.map((loan) => (
+              loans.map((loan) => (
                 <TableRow key={loan.id} className="hover:bg-muted/50">
                   <TableCell>
                     <div className="font-medium">{loan.userName || 'Unknown'}</div>
@@ -122,7 +133,7 @@ export default function Loans() {
                   <TableCell className="max-w-[200px] truncate text-sm">
                     {loan.purpose}
                   </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
+                  <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
                     {format(new Date(loan.createdAt), "MMM d, yyyy HH:mm")}
                   </TableCell>
                   <TableCell>

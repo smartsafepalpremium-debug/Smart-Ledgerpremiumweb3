@@ -4,6 +4,7 @@ import {
   useUpdateUser, 
   useDeleteUser, 
   useSuspendUser,
+  useCreateUser,
   getListUsersQueryKey 
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -27,7 +28,7 @@ import {
   SheetTitle 
 } from "@/components/ui/sheet";
 import { Label } from "@/components/ui/label";
-import { Search, MoreVertical, Edit2, ShieldAlert, Trash2 } from "lucide-react";
+import { Search, MoreVertical, Edit2, ShieldAlert, Trash2, Plus, ChevronLeft, ChevronRight, UserPlus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
   DropdownMenu,
@@ -46,25 +47,41 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
+const LIMIT = 20;
+
+type SheetMode = "edit" | "create" | null;
+
 export default function Users() {
   const [search, setSearch] = useState("");
-  const [page] = useState(1);
+  const [page, setPage] = useState(1);
   const [selectedUser, setSelectedUser] = useState<any | null>(null);
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [sheetMode, setSheetMode] = useState<SheetMode>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
+  const [createForm, setCreateForm] = useState({
+    firstName: "", lastName: "", email: "", password: "",
+    phone: "", country: "", balance: "0", profit: "0"
+  });
   
   const queryClient = useQueryClient();
   const { toast } = useToast();
   
-  const { data, isLoading } = useListUsers({ search, page });
+  const { data, isLoading } = useListUsers({ search: search || undefined, page, limit: LIMIT });
   
   const updateUser = useUpdateUser();
   const suspendUser = useSuspendUser();
   const deleteUser = useDeleteUser();
+  const createUser = useCreateUser();
+
+  const totalPages = data ? Math.ceil(data.total / LIMIT) : 1;
 
   const handleEdit = (user: any) => {
-    setSelectedUser(user);
-    setIsSheetOpen(true);
+    setSelectedUser({ ...user });
+    setSheetMode("edit");
+  };
+
+  const handleOpenCreate = () => {
+    setCreateForm({ firstName: "", lastName: "", email: "", password: "", phone: "", country: "", balance: "0", profit: "0" });
+    setSheetMode("create");
   };
 
   const handleUpdate = (e: React.FormEvent) => {
@@ -76,13 +93,46 @@ export default function Users() {
       data: {
         balance: Number(selectedUser.balance),
         profit: Number(selectedUser.profit),
-        status: selectedUser.status
+        status: selectedUser.status,
+        firstName: selectedUser.firstName,
+        lastName: selectedUser.lastName,
+        phone: selectedUser.phone,
+        country: selectedUser.country,
       }
     }, {
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: getListUsersQueryKey({ search, page }) });
+        queryClient.invalidateQueries({ queryKey: getListUsersQueryKey({ search: search || undefined, page, limit: LIMIT }) });
         toast({ title: "User updated successfully" });
-        setIsSheetOpen(false);
+        setSheetMode(null);
+      },
+      onError: () => {
+        toast({ title: "Failed to update user", variant: "destructive" });
+      }
+    });
+  };
+
+  const handleCreate = (e: React.FormEvent) => {
+    e.preventDefault();
+    createUser.mutate({
+      data: {
+        firstName: createForm.firstName,
+        lastName: createForm.lastName,
+        email: createForm.email,
+        password: createForm.password,
+        phone: createForm.phone || undefined,
+        country: createForm.country || undefined,
+        balance: Number(createForm.balance),
+        profit: Number(createForm.profit),
+      }
+    }, {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: getListUsersQueryKey({ search: search || undefined, page, limit: LIMIT }) });
+        queryClient.invalidateQueries({ queryKey: ["/api/admin/stats"] });
+        toast({ title: "User created successfully" });
+        setSheetMode(null);
+      },
+      onError: () => {
+        toast({ title: "Failed to create user", variant: "destructive" });
       }
     });
   };
@@ -94,7 +144,7 @@ export default function Users() {
       data: { suspended: !isSuspended, reason: "Admin action" }
     }, {
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: getListUsersQueryKey({ search, page }) });
+        queryClient.invalidateQueries({ queryKey: getListUsersQueryKey({ search: search || undefined, page, limit: LIMIT }) });
         toast({ title: isSuspended ? "User unsuspended" : "User suspended" });
       }
     });
@@ -104,7 +154,8 @@ export default function Users() {
     if (!deleteConfirm) return;
     deleteUser.mutate({ id: deleteConfirm }, {
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: getListUsersQueryKey({ search, page }) });
+        queryClient.invalidateQueries({ queryKey: getListUsersQueryKey({ search: search || undefined, page, limit: LIMIT }) });
+        queryClient.invalidateQueries({ queryKey: ["/api/admin/stats"] });
         toast({ title: "User deleted" });
         setDeleteConfirm(null);
       }
@@ -124,10 +175,13 @@ export default function Users() {
             <Input 
               placeholder="Search users..." 
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 w-[250px] bg-card/50"
+              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+              className="pl-9 w-[220px] bg-card/50"
             />
           </div>
+          <Button onClick={handleOpenCreate} className="bg-primary text-primary-foreground">
+            <UserPlus className="h-4 w-4 mr-2" /> New User
+          </Button>
         </div>
       </div>
 
@@ -197,58 +251,90 @@ export default function Users() {
         </Table>
       </div>
 
-      <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-        <SheetContent className="bg-card border-l-border">
+      {/* Pagination */}
+      {data && data.total > LIMIT && (
+        <div className="flex items-center justify-between text-sm text-muted-foreground">
+          <span>
+            Showing {((page - 1) * LIMIT) + 1}–{Math.min(page * LIMIT, data.total)} of {data.total} users
+          </span>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage(p => p - 1)}>
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <span className="px-2">{page} / {totalPages}</span>
+            <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPage(p => p + 1)}>
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Sheet */}
+      <Sheet open={sheetMode === "edit"} onOpenChange={(o) => !o && setSheetMode(null)}>
+        <SheetContent className="bg-card border-l-border overflow-y-auto">
           <SheetHeader>
             <SheetTitle>Edit User Profile</SheetTitle>
-            <SheetDescription>
-              Modify financial data and account status.
-            </SheetDescription>
+            <SheetDescription>Modify financial data and account status.</SheetDescription>
           </SheetHeader>
           
           {selectedUser && (
-            <form onSubmit={handleUpdate} className="space-y-6 mt-6">
-              <div className="space-y-4">
-                <div>
-                  <Label className="text-xs uppercase text-muted-foreground">User</Label>
-                  <div className="font-medium mt-1">{selectedUser.firstName} {selectedUser.lastName}</div>
-                  <div className="text-sm text-muted-foreground">{selectedUser.email}</div>
-                </div>
-                
+            <form onSubmit={handleUpdate} className="space-y-5 mt-6">
+              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="balance">Balance (USD)</Label>
-                  <Input 
-                    id="balance" 
-                    type="number" 
-                    step="0.01"
-                    value={selectedUser.balance}
-                    onChange={(e) => setSelectedUser({...selectedUser, balance: e.target.value})}
-                  />
+                  <Label htmlFor="firstName">First Name</Label>
+                  <Input id="firstName" value={selectedUser.firstName}
+                    onChange={(e) => setSelectedUser({...selectedUser, firstName: e.target.value})} />
                 </div>
-                
                 <div className="space-y-2">
-                  <Label htmlFor="profit">Profit (USD)</Label>
-                  <Input 
-                    id="profit" 
-                    type="number" 
-                    step="0.01"
-                    value={selectedUser.profit}
-                    onChange={(e) => setSelectedUser({...selectedUser, profit: e.target.value})}
-                  />
+                  <Label htmlFor="lastName">Last Name</Label>
+                  <Input id="lastName" value={selectedUser.lastName}
+                    onChange={(e) => setSelectedUser({...selectedUser, lastName: e.target.value})} />
                 </div>
-                
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-xs uppercase text-muted-foreground">Email</Label>
+                <div className="font-mono text-sm text-muted-foreground bg-muted/30 px-3 py-2 rounded-md">{selectedUser.email}</div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="status">Status</Label>
-                  <select 
-                    id="status"
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                    value={selectedUser.status}
-                    onChange={(e) => setSelectedUser({...selectedUser, status: e.target.value})}
-                  >
-                    <option value="active">Active</option>
-                    <option value="suspended">Suspended</option>
-                  </select>
+                  <Label htmlFor="phone">Phone</Label>
+                  <Input id="phone" value={selectedUser.phone || ""}
+                    onChange={(e) => setSelectedUser({...selectedUser, phone: e.target.value})} />
                 </div>
+                <div className="space-y-2">
+                  <Label htmlFor="country">Country</Label>
+                  <Input id="country" value={selectedUser.country || ""}
+                    onChange={(e) => setSelectedUser({...selectedUser, country: e.target.value})} />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="balance">Balance (USD)</Label>
+                <Input id="balance" type="number" step="0.01"
+                  value={selectedUser.balance}
+                  onChange={(e) => setSelectedUser({...selectedUser, balance: e.target.value})} />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="profit">Total Profit (USD)</Label>
+                <Input id="profit" type="number" step="0.01"
+                  value={selectedUser.profit}
+                  onChange={(e) => setSelectedUser({...selectedUser, profit: e.target.value})} />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="status">Account Status</Label>
+                <select 
+                  id="status"
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  value={selectedUser.status}
+                  onChange={(e) => setSelectedUser({...selectedUser, status: e.target.value})}
+                >
+                  <option value="active">Active</option>
+                  <option value="suspended">Suspended</option>
+                </select>
               </div>
               
               <Button type="submit" className="w-full" disabled={updateUser.isPending}>
@@ -259,13 +345,79 @@ export default function Users() {
         </SheetContent>
       </Sheet>
 
+      {/* Create Sheet */}
+      <Sheet open={sheetMode === "create"} onOpenChange={(o) => !o && setSheetMode(null)}>
+        <SheetContent className="bg-card border-l-border overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle>Create New User</SheetTitle>
+            <SheetDescription>Manually create a user account and set initial balance.</SheetDescription>
+          </SheetHeader>
+          
+          <form onSubmit={handleCreate} className="space-y-5 mt-6">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="c-firstName">First Name</Label>
+                <Input id="c-firstName" required value={createForm.firstName}
+                  onChange={(e) => setCreateForm({...createForm, firstName: e.target.value})} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="c-lastName">Last Name</Label>
+                <Input id="c-lastName" required value={createForm.lastName}
+                  onChange={(e) => setCreateForm({...createForm, lastName: e.target.value})} />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="c-email">Email Address</Label>
+              <Input id="c-email" type="email" required value={createForm.email}
+                onChange={(e) => setCreateForm({...createForm, email: e.target.value})} />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="c-password">Password</Label>
+              <Input id="c-password" type="password" required value={createForm.password}
+                onChange={(e) => setCreateForm({...createForm, password: e.target.value})} />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="c-phone">Phone (optional)</Label>
+                <Input id="c-phone" value={createForm.phone}
+                  onChange={(e) => setCreateForm({...createForm, phone: e.target.value})} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="c-country">Country (optional)</Label>
+                <Input id="c-country" value={createForm.country}
+                  onChange={(e) => setCreateForm({...createForm, country: e.target.value})} />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="c-balance">Initial Balance (USD)</Label>
+                <Input id="c-balance" type="number" step="0.01" value={createForm.balance}
+                  onChange={(e) => setCreateForm({...createForm, balance: e.target.value})} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="c-profit">Initial Profit (USD)</Label>
+                <Input id="c-profit" type="number" step="0.01" value={createForm.profit}
+                  onChange={(e) => setCreateForm({...createForm, profit: e.target.value})} />
+              </div>
+            </div>
+            
+            <Button type="submit" className="w-full" disabled={createUser.isPending}>
+              {createUser.isPending ? "Creating..." : "Create User"}
+            </Button>
+          </form>
+        </SheetContent>
+      </Sheet>
+
       <AlertDialog open={!!deleteConfirm} onOpenChange={() => setDeleteConfirm(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the user
-              account and remove their data from our servers.
+              This action cannot be undone. This will permanently delete the user account and all their data.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
