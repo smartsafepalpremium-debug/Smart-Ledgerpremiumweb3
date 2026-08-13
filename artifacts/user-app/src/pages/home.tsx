@@ -53,6 +53,7 @@ function LayersIcon() {
 export default function Home() {
   const { isAuthenticated } = useAuth();
   const primaryHref = isAuthenticated ? "/overview" : "/register";
+  const walletHref = isAuthenticated ? "/wallet-connect" : "/login";
 
   return (
     <div className="min-h-[100dvh] overflow-hidden bg-background text-foreground">
@@ -64,6 +65,7 @@ export default function Home() {
           <nav className="hidden items-center gap-8 md:flex">
             <a href="#platform" className="text-xs font-semibold text-muted-foreground transition-colors hover:text-foreground">Platform</a>
             <a href="#signal" className="text-xs font-semibold text-muted-foreground transition-colors hover:text-foreground">Why Smartledger</a>
+            <a href="#wallet" className="text-xs font-semibold text-muted-foreground transition-colors hover:text-foreground">Wallet security</a>
             <a href="#security" className="text-xs font-semibold text-muted-foreground transition-colors hover:text-foreground">Security</a>
           </nav>
           <div className="flex items-center gap-3">
@@ -205,6 +207,55 @@ export default function Home() {
             <h2 className="max-w-lg text-4xl font-semibold leading-none tracking-[-.07em] sm:text-5xl">The right information changes the move.</h2>
             <p className="mt-6 max-w-lg text-base leading-7 text-muted-foreground">Smartledger Premium Web3 turns a scattered digital asset life into one calm, actionable view. Know what you hold, where it is working, and what comes next.</p>
             <Link href={primaryHref} className="group mt-8 inline-flex items-center gap-2 text-sm font-bold text-primary transition-colors hover:text-foreground">See your command center <ArrowIcon className="h-4 w-4 transition-transform group-hover:translate-x-1" /></Link>
+          </div>
+        </section>
+
+        <section id="wallet" className="border-y border-border/70 bg-card/25">
+          <div className="mx-auto grid max-w-7xl gap-10 px-5 py-16 sm:px-8 lg:grid-cols-[1.05fr_.95fr] lg:items-center lg:px-10 lg:py-24">
+            <div>
+              <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+                <ShieldIcon />
+              </div>
+              <p className="sl-kicker mb-4 text-primary">Wallet connect</p>
+              <h2 className="max-w-xl text-4xl font-semibold leading-none tracking-[-.07em] sm:text-5xl">Secure your wallet from hackers.</h2>
+              <p className="mt-6 max-w-lg text-base leading-7 text-muted-foreground">
+                Your wallet is the gateway to your digital assets. Keep it protected with a focused connection flow, clear account controls, and one place to review how your wallet is connected to Smartledger Premium Web3.
+              </p>
+              <Link href={walletHref} className="group mt-8 inline-flex items-center gap-3 rounded-lg bg-primary px-5 py-3.5 text-sm font-bold text-primary-foreground transition-all hover:-translate-y-0.5 hover:brightness-105">
+                {isAuthenticated ? "Connect your wallet" : "Sign in to connect"}
+                <ArrowIcon className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+              </Link>
+            </div>
+            <div className="sl-panel relative overflow-hidden rounded-2xl p-5 sm:p-7">
+              <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full border border-primary/20" />
+              <div className="pointer-events-none absolute -right-5 -top-5 h-28 w-28 rounded-full border border-primary/15" />
+              <div className="relative">
+                <div className="flex items-center justify-between border-b border-border pb-5">
+                  <div>
+                    <p className="sl-mono text-[9px] uppercase tracking-[.18em] text-muted-foreground">Wallet protection</p>
+                    <p className="mt-2 text-lg font-semibold tracking-[-.04em]">Connection status</p>
+                  </div>
+                  <span className="flex items-center gap-2 rounded-full border border-primary/25 bg-primary/10 px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider text-primary"><span className="h-1.5 w-1.5 rounded-full bg-primary" /> Protected</span>
+                </div>
+                <div className="mt-6 flex items-center gap-4 rounded-xl border border-primary/20 bg-primary/[.07] p-4">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+                    <ShieldIcon />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold">Stay one step ahead</p>
+                    <p className="mt-1 text-xs leading-5 text-muted-foreground">Review your wallet connection before you move assets.</p>
+                  </div>
+                </div>
+                <div className="mt-4 space-y-3">
+                  {["Private account controls", "Clear connection status", "Focused security workflow"].map((item) => (
+                    <div key={item} className="flex items-center gap-3 border-b border-border/70 pb-3 text-xs font-semibold last:border-0 last:pb-0">
+                      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">✓</span>
+                      {item}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
