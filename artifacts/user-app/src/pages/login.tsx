@@ -28,7 +28,7 @@ export default function Login() {
     mutation: {
       onSuccess: (data: any) => {
         login(data.token, data.user);
-        setLocation("/");
+        setLocation("/overview");
       },
       onError: (err: any) => setError(err?.data?.error ?? "Invalid credentials"),
     },

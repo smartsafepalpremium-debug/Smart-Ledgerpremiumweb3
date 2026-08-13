@@ -8,7 +8,7 @@ type IconProps = { className?: string };
 type MenuItem = { path: string; label: string; icon: FC<IconProps> };
 
 const MENU_ITEMS: MenuItem[] = [
-  { path: "/", label: "Overview", icon: OverviewIcon },
+  { path: "/overview", label: "Overview", icon: OverviewIcon },
   { path: "/trade", label: "Trade", icon: TradeIcon },
   { path: "/investment-plans", label: "Investment plans", icon: PlansIcon },
   { path: "/portfolio", label: "Portfolio", icon: PortfolioIcon },
@@ -63,7 +63,7 @@ function NavItem({ path, label, icon: Icon, active, onClick }: MenuItem & { acti
 function SidebarContent({ onNav }: { onNav?: () => void }) {
   const [location] = useLocation();
   const { user, logout } = useAuth();
-  const isActive = (path: string) => path === "/" ? location === "/" || location === "/overview" : location.startsWith(path);
+  const isActive = (path: string) => path === "/overview" ? location === "/" || location === "/overview" : location.startsWith(path);
   const initials = user ? `${user.firstName?.[0] ?? ""}${user.lastName?.[0] ?? ""}`.toUpperCase() : "U";
 
   return (
@@ -106,7 +106,7 @@ function SidebarContent({ onNav }: { onNav?: () => void }) {
 function MobileDock() {
   const [location] = useLocation();
   const items = MENU_ITEMS.slice(0, 4);
-  const isActive = (path: string) => path === "/" ? location === "/" || location === "/overview" : location.startsWith(path);
+  const isActive = (path: string) => path === "/overview" ? location === "/" || location === "/overview" : location.startsWith(path);
   return (
     <nav className="fixed inset-x-3 bottom-3 z-30 grid grid-cols-4 rounded-2xl border border-border bg-[hsl(48,13%,10%)]/95 p-1.5 shadow-2xl backdrop-blur-xl md:hidden" aria-label="Mobile navigation">
       {items.map(({ path, label, icon: Icon }) => (
@@ -122,7 +122,7 @@ function MobileDock() {
 export function DashboardLayout({ children }: { children: ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [location] = useLocation();
-  const current = [...MENU_ITEMS, ...SECURITY_ITEMS].find((item) => item.path !== "/" && location.startsWith(item.path)) ?? MENU_ITEMS[0];
+  const current = [...MENU_ITEMS, ...SECURITY_ITEMS].find((item) => location.startsWith(item.path)) ?? MENU_ITEMS[0];
 
   return (
     <div className="min-h-[100dvh] overflow-hidden bg-background">

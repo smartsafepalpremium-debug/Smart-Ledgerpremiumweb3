@@ -19,6 +19,7 @@ import CardOrder from "@/pages/card-order";
 import Kyc from "@/pages/kyc";
 import WalletConnect from "@/pages/wallet-connect";
 import Settings from "@/pages/settings";
+import Home from "@/pages/home";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -64,7 +65,7 @@ function GuestRoute({ component: Component }: { component: React.ComponentType }
 
   useEffect(() => {
     if (isInitialized && isAuthenticated) {
-      setLocation("/");
+      setLocation("/overview");
     }
   }, [isAuthenticated, isInitialized, setLocation]);
 
@@ -96,7 +97,7 @@ function Router() {
       <Route path="/login" component={() => <GuestRoute component={Login} />} />
       <Route path="/register" component={() => <GuestRoute component={Register} />} />
 
-      <Route path="/" component={() => <ProtectedRoute component={Overview} />} />
+      <Route path="/" component={Home} />
       <Route path="/overview" component={() => <ProtectedRoute component={Overview} />} />
       <Route path="/trade" component={() => <ProtectedRoute component={Trade} />} />
       <Route path="/investment-plans" component={() => <ProtectedRoute component={InvestmentPlans} />} />
