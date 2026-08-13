@@ -9,7 +9,7 @@ function Mark({ invert = false }: { invert?: boolean }) {
         <span className={`absolute -right-0.5 -top-0.5 h-1.5 w-1.5 rounded-full ${invert ? "bg-primary" : "bg-[#15150f]"}`} />
       </div>
       <div>
-        <p className="text-sm font-semibold tracking-[-0.04em]">Smartledger</p>
+        <p className="text-sm font-semibold tracking-[-0.04em]">Smartledger Premium Web3</p>
         <p className={`sl-mono mt-1 text-[9px] uppercase tracking-[.18em] ${invert ? "text-[#15150f]/60" : "text-muted-foreground"}`}>Premium terminal</p>
       </div>
     </div>
@@ -58,7 +58,7 @@ export default function Home() {
     <div className="min-h-[100dvh] overflow-hidden bg-background text-foreground">
       <header className="relative z-10 border-b border-border/70">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-5 sm:px-8 lg:px-10">
-          <Link href="/" aria-label="Smartledger home">
+          <Link href="/" aria-label="Smartledger Premium Web3 home">
             <Mark />
           </Link>
           <nav className="hidden items-center gap-8 md:flex">
@@ -203,7 +203,7 @@ export default function Home() {
           <div className="order-1 lg:order-2">
             <p className="sl-kicker mb-4 text-primary">Built for conviction</p>
             <h2 className="max-w-lg text-4xl font-semibold leading-none tracking-[-.07em] sm:text-5xl">The right information changes the move.</h2>
-            <p className="mt-6 max-w-lg text-base leading-7 text-muted-foreground">Smartledger turns a scattered digital asset life into one calm, actionable view. Know what you hold, where it is working, and what comes next.</p>
+            <p className="mt-6 max-w-lg text-base leading-7 text-muted-foreground">Smartledger Premium Web3 turns a scattered digital asset life into one calm, actionable view. Know what you hold, where it is working, and what comes next.</p>
             <Link href={primaryHref} className="group mt-8 inline-flex items-center gap-2 text-sm font-bold text-primary transition-colors hover:text-foreground">See your command center <ArrowIcon className="h-4 w-4 transition-transform group-hover:translate-x-1" /></Link>
           </div>
         </section>
@@ -215,7 +215,7 @@ export default function Home() {
               <h2 className="mt-10 max-w-xl text-4xl font-semibold leading-none tracking-[-.07em] text-[#15150f] sm:text-6xl">Make the move<br />you can stand behind.</h2>
             </div>
             <div className="max-w-sm">
-              <p className="text-sm leading-6 text-[#15150f]/70">Your next position starts with a clearer view. Enter Smartledger Premium and build from signal, not noise.</p>
+              <p className="text-sm leading-6 text-[#15150f]/70">Your next position starts with a clearer view. Enter Smartledger Premium Web3 and build from signal, not noise.</p>
               <Link href={primaryHref} className="group mt-6 inline-flex items-center gap-3 rounded-lg bg-[#15150f] px-5 py-3.5 text-sm font-bold text-primary transition-transform hover:-translate-y-0.5">Enter Smartledger <ArrowIcon className="h-4 w-4 transition-transform group-hover:translate-x-1" /></Link>
             </div>
           </div>
@@ -224,7 +224,7 @@ export default function Home() {
 
       <footer className="border-t border-border bg-background">
         <div className="mx-auto flex max-w-7xl flex-col gap-4 px-5 py-6 sm:flex-row sm:items-center sm:justify-between sm:px-8 lg:px-10">
-          <p className="sl-mono text-[9px] uppercase tracking-[.16em] text-muted-foreground">Smartledger Premium · Digital asset infrastructure</p>
+          <p className="sl-mono text-[9px] uppercase tracking-[.16em] text-muted-foreground">Smartledger Premium Web3 · Digital asset infrastructure</p>
           <p className="text-xs text-muted-foreground">Move with conviction.</p>
         </div>
       </footer>
