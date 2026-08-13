@@ -38,10 +38,16 @@ function ProtectedRoute({ component: Component }: { component: React.ComponentTy
 
   if (!isInitialized) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-          <span className="text-sm text-muted-foreground">Loading...</span>
+      <div className="sl-grid flex min-h-[100dvh] items-center justify-center bg-background">
+        <div className="w-full max-w-xs px-6">
+          <div className="mb-4 flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-xs font-bold text-primary-foreground">SL</div>
+            <span className="text-sm font-semibold text-foreground">Smartledger</span>
+          </div>
+          <div className="h-1 overflow-hidden rounded-full bg-secondary">
+            <div className="h-full w-1/2 animate-pulse rounded-full bg-primary" />
+          </div>
+          <span className="mt-3 block text-[10px] uppercase tracking-[.16em] text-muted-foreground">Connecting secure session</span>
         </div>
       </div>
     );
@@ -64,8 +70,17 @@ function GuestRoute({ component: Component }: { component: React.ComponentType }
 
   if (!isInitialized) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      <div className="sl-grid flex min-h-[100dvh] items-center justify-center bg-background">
+        <div className="w-full max-w-xs px-6">
+          <div className="mb-4 flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-xs font-bold text-primary-foreground">SL</div>
+            <span className="text-sm font-semibold text-foreground">Smartledger</span>
+          </div>
+          <div className="h-1 overflow-hidden rounded-full bg-secondary">
+            <div className="h-full w-1/2 animate-pulse rounded-full bg-primary" />
+          </div>
+          <span className="mt-3 block text-[10px] uppercase tracking-[.16em] text-muted-foreground">Preparing account access</span>
+        </div>
       </div>
     );
   }

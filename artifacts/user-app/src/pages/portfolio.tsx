@@ -68,7 +68,7 @@ export default function Portfolio() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="bg-card border border-border rounded-xl p-5">
             <p className="text-xs text-muted-foreground uppercase tracking-widest mb-1">Active Loans</p>
-            <p className="text-3xl font-bold text-purple-400">{p?.activeLoans ?? 0}</p>
+                <p className="text-3xl font-bold text-accent">{p?.activeLoans ?? 0}</p>
           </div>
           <div className="bg-card border border-border rounded-xl p-5">
             <p className="text-xs text-muted-foreground uppercase tracking-widest mb-1">Pending Deposits</p>

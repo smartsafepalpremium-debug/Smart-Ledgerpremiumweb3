@@ -22,8 +22,8 @@ function progressPct(createdAt: string, maturesAt: string) {
 
 const PLAN_COLORS = [
   { grad: "from-primary/20 to-primary/5", border: "border-primary/30", text: "text-primary", btn: "bg-primary hover:bg-primary/90 text-primary-foreground" },
-  { grad: "from-blue-500/20 to-blue-500/5", border: "border-blue-500/30", text: "text-blue-400", btn: "bg-blue-500 hover:bg-blue-500/90 text-white" },
-  { grad: "from-purple-500/20 to-purple-500/5", border: "border-purple-500/30", text: "text-purple-400", btn: "bg-purple-500 hover:bg-purple-500/90 text-white" },
+  { grad: "from-primary/20 to-primary/5", border: "border-primary/30", text: "text-primary", btn: "bg-primary hover:bg-primary/90 text-primary-foreground" },
+  { grad: "from-accent/20 to-accent/5", border: "border-accent/30", text: "text-accent", btn: "bg-accent hover:bg-accent/90 text-accent-foreground" },
 ];
 
 export default function InvestmentPlans() {

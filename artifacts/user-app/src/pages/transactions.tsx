@@ -9,7 +9,7 @@ const typeColor: Record<string, string> = {
   deposit: "text-green-400 bg-green-400/10",
   withdrawal: "text-red-400 bg-red-400/10",
   profit: "text-primary bg-primary/10",
-  loan: "text-purple-400 bg-purple-400/10",
+    loan: "text-accent bg-accent/10",
   fee: "text-orange-400 bg-orange-400/10",
 };
 
