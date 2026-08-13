@@ -61,7 +61,7 @@ function NavItem({ path, label, icon: Icon, active, onClick }: MenuItem & { acti
 }
 
 function SidebarContent({ onNav }: { onNav?: () => void }) {
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
   const { user, logout } = useAuth();
   const isActive = (path: string) => path === "/overview" ? location === "/" || location === "/overview" : location.startsWith(path);
   const initials = user ? `${user.firstName?.[0] ?? ""}${user.lastName?.[0] ?? ""}`.toUpperCase() : "U";
@@ -69,7 +69,9 @@ function SidebarContent({ onNav }: { onNav?: () => void }) {
   return (
     <div className="flex h-full flex-col">
       <div className="border-b border-border/80 px-5 py-5">
-        <BrandMark />
+        <Link href="/" onClick={onNav} aria-label="Go to Smartledger Premium Web3 homepage">
+          <BrandMark />
+        </Link>
       </div>
 
       <div className="flex-1 overflow-y-auto px-3 py-5">
@@ -94,7 +96,7 @@ function SidebarContent({ onNav }: { onNav?: () => void }) {
           </div>
           <span className="sl-mono text-[10px] text-muted-foreground">GO</span>
         </Link>
-        <button onClick={logout} data-testid="button-sign-out" className="mt-1 flex w-full items-center gap-3 rounded-lg px-2.5 py-2 text-xs text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive">
+        <button onClick={() => { logout(); setLocation("/"); }} data-testid="button-sign-out" className="mt-1 flex w-full items-center gap-3 rounded-lg px-2.5 py-2 text-xs text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive">
           <SignOutIcon className="h-4 w-4" />
           Sign out
         </button>

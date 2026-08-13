@@ -1,6 +1,6 @@
 kind = "web"
 previewPath = "/"
-title = "Smartledger Premium — User Dashboard"
+title = "Smartledger Premium Web3"
 version = "1.0.0"
 id = "artifacts/user-app"
 router = "path"
