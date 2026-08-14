@@ -6,22 +6,23 @@ const BRAND_NAME = "Smartledger Premium Web3";
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL ?? "smartsafepalpremium@gmail.com";
 
 async function getSMTPConfig() {
+  const pass = process.env.SMTP_PASS?.trim();
+  if (pass) {
+    return {
+      host: process.env.SMTP_HOST?.trim() || "smtp.gmail.com",
+      port: Number(process.env.SMTP_PORT || 587),
+      user: process.env.SMTP_USER?.trim() || ADMIN_EMAIL,
+      pass,
+    };
+  }
+
   try {
     const [s] = await db.select().from(settingsTable).limit(1);
     if (s?.smtpHost && s?.smtpUser && s?.smtpPass) {
       return { host: s.smtpHost, port: s.smtpPort ?? 587, user: s.smtpUser, pass: s.smtpPass };
     }
   } catch { /* fall through */ }
-
-  const pass = process.env.SMTP_PASS?.trim();
-  if (!pass) return null;
-
-  return {
-    host: process.env.SMTP_HOST?.trim() || "smtp.gmail.com",
-    port: Number(process.env.SMTP_PORT || 587),
-    user: process.env.SMTP_USER?.trim() || ADMIN_EMAIL,
-    pass,
-  };
+  return null;
 }
 
 function buildTransporter(cfg: { host: string; port: number; user: string; pass: string }) {
