@@ -4,7 +4,7 @@ import { z } from "zod/v4";
 
 export const settingsTable = pgTable("settings", {
   id: serial("id").primaryKey(),
-  siteName: text("site_name").notNull().default("Smartledger Premium"),
+  siteName: text("site_name").notNull().default("Smartledger Premium Web3"),
   adminEmail: text("admin_email").notNull().default("smartsafepalpremium@gmail.com"),
   referralBonusPercent: real("referral_bonus_percent").notNull().default(5),
   minDeposit: real("min_deposit").notNull().default(100),

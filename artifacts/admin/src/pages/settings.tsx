@@ -110,7 +110,7 @@ export default function Settings() {
     }
   };
 
-  const smtpConfigured = !!(settings?.smtpHost && settings?.smtpUser);
+  const smtpConfigured = true;
 
   if (isLoading) {
     return <div className="text-muted-foreground animate-pulse">Loading configuration...</div>;
@@ -348,9 +348,9 @@ export default function Settings() {
                 </div>
               )}
 
-              {!smtpConfigured && (
-                <p className="text-xs text-muted-foreground">Configure and save your SMTP settings first to enable test emails.</p>
-              )}
+              <p className="text-xs text-muted-foreground">
+                Uses saved SMTP settings when present, otherwise the platform mail sender configured by the server.
+              </p>
             </div>
           </CardContent>
         </Card>

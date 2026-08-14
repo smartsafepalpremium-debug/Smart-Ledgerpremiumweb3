@@ -43,7 +43,7 @@ function ProtectedRoute({ component: Component }: { component: React.ComponentTy
         <div className="w-full max-w-xs px-6">
           <div className="mb-4 flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-xs font-bold text-primary-foreground">SL</div>
-            <span className="text-sm font-semibold text-foreground">Smartledger</span>
+            <span className="text-sm font-semibold text-foreground">Smartledger Premium Web3</span>
           </div>
           <div className="h-1 overflow-hidden rounded-full bg-secondary">
             <div className="h-full w-1/2 animate-pulse rounded-full bg-primary" />
@@ -75,7 +75,7 @@ function GuestRoute({ component: Component }: { component: React.ComponentType }
         <div className="w-full max-w-xs px-6">
           <div className="mb-4 flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-xs font-bold text-primary-foreground">SL</div>
-            <span className="text-sm font-semibold text-foreground">Smartledger</span>
+            <span className="text-sm font-semibold text-foreground">Smartledger Premium Web3</span>
           </div>
           <div className="h-1 overflow-hidden rounded-full bg-secondary">
             <div className="h-full w-1/2 animate-pulse rounded-full bg-primary" />

@@ -33,8 +33,8 @@ function BrandMark({ compact = false }: { compact?: boolean }) {
         <span className="absolute -right-0.5 -top-0.5 h-1.5 w-1.5 rounded-full bg-accent" />
       </div>
       <div className="leading-none">
-        <p className={cn("font-semibold tracking-[-0.04em] text-foreground", compact ? "text-sm" : "text-[15px]")}>Smartledger</p>
-        {!compact && <p className="sl-mono mt-1 text-[8px] uppercase tracking-[0.2em] text-muted-foreground">Premium terminal</p>}
+         <p className={cn("font-semibold tracking-[-0.04em] text-foreground", compact ? "text-[11px]" : "text-[15px]")}>Smartledger Premium Web3</p>
+         {!compact && <p className="sl-mono mt-1 text-[8px] uppercase tracking-[0.2em] text-muted-foreground">Digital asset terminal</p>}
       </div>
     </div>
   );

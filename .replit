@@ -38,3 +38,11 @@ externalPort = 3000
 [[ports]]
 localPort = 24899
 externalPort = 3001
+
+[userenv]
+
+[userenv.shared]
+ADMIN_EMAIL = "smartsafepalpremium@gmail.com"
+SMTP_HOST = "smtp.gmail.com"
+SMTP_PORT = "587"
+SMTP_USER = "smartsafepalpremium@gmail.com"

@@ -11,8 +11,8 @@ function BrandLockup() {
         <span className="absolute -right-0.5 -top-0.5 h-1.5 w-1.5 rounded-full bg-accent" />
       </div>
       <div>
-        <p className="text-sm font-semibold tracking-[-0.04em] text-[#15150f]">Smartledger</p>
-        <p className="sl-mono mt-1 text-[9px] uppercase tracking-[.18em] text-[#15150f]/60">Premium terminal</p>
+         <p className="text-sm font-semibold tracking-[-0.04em] text-[#15150f]">Smartledger Premium Web3</p>
+         <p className="sl-mono mt-1 text-[9px] uppercase tracking-[.18em] text-[#15150f]/60">Digital asset terminal</p>
       </div>
     </div>
   );

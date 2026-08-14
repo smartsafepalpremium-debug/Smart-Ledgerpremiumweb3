@@ -55,7 +55,7 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
       <div className="p-6 flex items-center justify-between">
         <div className="flex items-center gap-2 font-display text-xl font-bold">
           <span className="text-primary">Smartledger</span>
-          <span className="text-muted-foreground font-light text-sm tracking-widest uppercase">PREMIUM</span>
+          <span className="text-muted-foreground font-light text-sm tracking-widest uppercase">PREMIUM WEB3</span>
         </div>
         {onClose && (
           <button onClick={onClose} className="md:hidden text-muted-foreground hover:text-foreground">
@@ -148,7 +148,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </Button>
           <div className="flex items-center gap-2 font-display font-bold md:hidden">
             <span className="text-primary">Smartledger</span>
-            <span className="text-muted-foreground font-light text-xs tracking-widest uppercase">PREMIUM</span>
+            <span className="text-muted-foreground font-light text-xs tracking-widest uppercase">PREMIUM WEB3</span>
           </div>
         </header>
         <div className="flex-1 overflow-y-auto p-8">

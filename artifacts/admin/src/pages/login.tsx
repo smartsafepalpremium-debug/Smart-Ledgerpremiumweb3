@@ -59,7 +59,7 @@ export default function Login() {
             <Lock className="w-6 h-6 text-primary" />
           </div>
           <CardTitle className="text-2xl font-display font-bold">
-            Smartledger <span className="text-primary">Premium</span>
+            Smartledger <span className="text-primary">Premium Web3</span>
           </CardTitle>
           <CardDescription className="uppercase tracking-widest text-xs">
             Administrator Command Center
