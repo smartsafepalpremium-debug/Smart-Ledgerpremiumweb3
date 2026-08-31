@@ -24,8 +24,6 @@ import type {
   AdminInfo,
   AdminLoginInput,
   AdminStats,
-  ContactMessageInput,
-  ContactMessageResult,
   CreateInvestment400,
   Deposit,
   DepositInput,
@@ -2765,77 +2763,6 @@ export const useLoginUser = <TError = ErrorType<unknown>,
         TContext
       > => {
       return useMutation(getLoginUserMutationOptions(options));
-    }
-
-export const getSendUserContactMessageUrl = () => {
-
-
-
-
-  return `/api/user/contact-message`
-}
-
-/**
- * @summary Send a message to the admin
- */
-export const sendUserContactMessage = async (contactMessageInput: ContactMessageInput, options?: RequestInit): Promise<ContactMessageResult> => {
-
-  return customFetch<ContactMessageResult>(getSendUserContactMessageUrl(),
-  {
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      contactMessageInput,)
-  }
-);}
-
-
-
-
-export const getSendUserContactMessageMutationOptions = <TError = ErrorType<void>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof sendUserContactMessage>>, TError,{data: BodyType<ContactMessageInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof sendUserContactMessage>>, TError,{data: BodyType<ContactMessageInput>}, TContext> => {
-
-const mutationKey = ['sendUserContactMessage'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof sendUserContactMessage>>, {data: BodyType<ContactMessageInput>}> = (props) => {
-          const {data} = props ?? {};
-
-          return  sendUserContactMessage(data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type SendUserContactMessageMutationResult = NonNullable<Awaited<ReturnType<typeof sendUserContactMessage>>>
-    export type SendUserContactMessageMutationBody = BodyType<ContactMessageInput>
-    export type SendUserContactMessageMutationError = ErrorType<void>
-
-    /**
- * @summary Send a message to the admin
- */
-export const useSendUserContactMessage = <TError = ErrorType<void>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof sendUserContactMessage>>, TError,{data: BodyType<ContactMessageInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
- ): UseMutationResult<
-        Awaited<ReturnType<typeof sendUserContactMessage>>,
-        TError,
-        {data: BodyType<ContactMessageInput>},
-        TContext
-      > => {
-      return useMutation(getSendUserContactMessageMutationOptions(options));
     }
 
 export const getSubmitDepositUrl = () => {

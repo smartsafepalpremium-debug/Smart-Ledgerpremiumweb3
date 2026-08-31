@@ -732,22 +732,6 @@ export const LoginUserResponse = zod.object({
 
 
 /**
- * @summary Send a message to the admin
- */
-export const sendUserContactMessageBodySubjectMin = 3;
-export const sendUserContactMessageBodySubjectMax = 120;
-
-export const sendUserContactMessageBodyMessageMax = 5000;
-
-
-
-export const SendUserContactMessageBody = zod.object({
-  "subject": zod.string().min(sendUserContactMessageBodySubjectMin).max(sendUserContactMessageBodySubjectMax),
-  "message": zod.string().min(1).max(sendUserContactMessageBodyMessageMax)
-})
-
-
-/**
  * @summary Submit a deposit request
  */
 export const SubmitDepositBody = zod.object({

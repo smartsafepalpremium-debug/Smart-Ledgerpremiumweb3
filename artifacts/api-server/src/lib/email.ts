@@ -204,43 +204,6 @@ export async function sendWithdrawalRequestToAdmin(
   await send(adminEmail, `New Withdrawal Request — $${amount} — ${BRAND_NAME}`, baseTemplate("New Withdrawal Request", body));
 }
 
-function escapeHtml(value: string): string {
-  return value
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-}
-
-export async function sendUserMessageToAdmin(
-  adminEmail: string,
-  userName: string,
-  userEmail: string,
-  subject: string,
-  message: string,
-): Promise<boolean> {
-  const safeName = escapeHtml(userName);
-  const safeEmail = escapeHtml(userEmail);
-  const safeSubject = escapeHtml(subject);
-  const safeMessage = escapeHtml(message).replaceAll("\n", "<br />");
-  const body = `
-    <p class="body-text">A message was sent from the ${BRAND_NAME} user dashboard.</p>
-    <div class="highlight">
-      <p><strong>From:</strong> ${safeName} (${safeEmail})</p>
-      <p><strong>Subject:</strong> ${safeSubject}</p>
-    </div>
-    <p class="body-text" style="white-space: normal;">${safeMessage}</p>
-    <p class="body-text">Reply directly to this email to respond to the user.</p>
-  `;
-  return send(
-    adminEmail,
-    `${subject} — ${BRAND_NAME}`,
-    baseTemplate("New Message From User", body),
-    userEmail,
-  );
-}
-
 export async function sendTestEmail(to: string): Promise<{ ok: boolean; error?: string }> {
   const body = `
     <p class="body-text">This is a test email from ${BRAND_NAME}.</p>
@@ -265,7 +228,7 @@ export async function sendTestEmail(to: string): Promise<{ ok: boolean; error?: 
   }
 }
 
-async function send(to: string, subject: string, html: string, replyTo?: string): Promise<boolean> {
+async function send(to: string, subject: string, html: string) {
   try {
     const { transport, fromAddr } = await getMailer();
     await transport.sendMail({
@@ -273,11 +236,8 @@ async function send(to: string, subject: string, html: string, replyTo?: string)
       to,
       subject,
       html,
-      ...(replyTo ? { replyTo } : {}),
     });
-    return true;
   } catch (err) {
     logger.error({ err, to, subject }, "Failed to send email");
-    return false;
   }
 }

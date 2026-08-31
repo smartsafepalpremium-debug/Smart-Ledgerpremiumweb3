@@ -11,8 +11,6 @@ export * from './adminAuthResult';
 export * from './adminInfo';
 export * from './adminLoginInput';
 export * from './adminStats';
-export * from './contactMessageInput';
-export * from './contactMessageResult';
 export * from './createInvestment400';
 export * from './deposit';
 export * from './depositInput';

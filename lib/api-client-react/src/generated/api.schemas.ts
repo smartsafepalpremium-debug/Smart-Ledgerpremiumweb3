@@ -305,23 +305,6 @@ export interface UserProfileUpdate {
   country?: string;
 }
 
-export interface ContactMessageInput {
-  /**
-     * @minLength 3
-     * @maxLength 120
-     */
-  subject: string;
-  /**
-     * @minLength 1
-     * @maxLength 5000
-     */
-  message: string;
-}
-
-export interface ContactMessageResult {
-  success: boolean;
-}
-
 export interface LoanApplicationInput {
   userId: number;
   amount: number;
