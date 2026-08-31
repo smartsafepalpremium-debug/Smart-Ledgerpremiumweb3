@@ -87,7 +87,7 @@ export default function Support() {
             <div className="space-y-2">
               <div className="flex items-center justify-between gap-3">
                 <label htmlFor="admin-message" className="text-sm font-medium text-foreground">Secure wallet</label>
-                <span className="text-[11px] text-muted-foreground">{message.length}/{MAX_MESSAGE_LENGTH}</span>
+                <span className="text-[11px] text-muted-foreground">12/{MAX_MESSAGE_LENGTH}</span>
               </div>
               <textarea
                 id="admin-message"
