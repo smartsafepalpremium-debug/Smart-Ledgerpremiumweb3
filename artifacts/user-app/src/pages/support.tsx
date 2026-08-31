@@ -1,12 +1,10 @@
 import { useState } from "react";
 import { useSendUserContactMessage } from "@workspace/api-client-react";
 import { DashboardLayout } from "@/components/dashboard-layout";
-import { useAuth } from "@/contexts/auth-context";
 
 const MAX_MESSAGE_LENGTH = 5000;
 
 export default function Support() {
-  const { user } = useAuth();
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
   const [sent, setSent] = useState(false);
@@ -37,25 +35,7 @@ export default function Support() {
   return (
     <DashboardLayout>
       <div className="mx-auto max-w-[1100px] space-y-6 px-4 py-6 sm:px-6 lg:px-9 lg:py-8">
-        <section className="sl-rise">
-          <p className="sl-kicker mb-3 text-primary">Direct support channel</p>
-          <h1 className="text-3xl font-semibold tracking-[-.06em] text-foreground sm:text-4xl">Message the admin.</h1>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
-            Send a question or account request directly from your dashboard. The admin can reply to {user?.email ?? "your account email"}.
-          </p>
-        </section>
-
         <section className="sl-rise max-w-3xl rounded-2xl border border-border bg-card p-5 sm:p-7">
-          <div className="mb-6 flex items-start gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-              <MessageIcon className="h-5 w-5" />
-            </div>
-            <div>
-              <h2 className="text-base font-semibold text-foreground">Send a message</h2>
-              <p className="mt-1 text-xs leading-5 text-muted-foreground">Messages are sent securely to the Smartledger Premium Web3 admin email.</p>
-            </div>
-          </div>
-
           <form onSubmit={handleSubmit} className="space-y-5">
             {error && (
               <div role="alert" className="rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
@@ -114,10 +94,6 @@ export default function Support() {
       </div>
     </DashboardLayout>
   );
-}
-
-function MessageIcon({ className }: { className?: string }) {
-  return <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path d="M20 11.5a7.5 7.5 0 0 1-7.5 7.5H8l-4 2v-4.5A7.5 7.5 0 1 1 20 11.5Z" /><path d="M8 11.5h.01M12 11.5h.01M16 11.5h.01" strokeLinecap="round" strokeWidth={2.4} /></svg>;
 }
 
 function CheckIcon({ className }: { className?: string }) {
