@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useSendUserContactMessage } from "@workspace/api-client-react";
 import { DashboardLayout } from "@/components/dashboard-layout";
 
-const MAX_MESSAGE_LENGTH = 5000;
+const MAX_MESSAGE_LENGTH = 24;
 const CRYPTO_WALLETS = [
   "MetaMask",
   "Trust Wallet",
