@@ -4,6 +4,8 @@ import { useAuth } from "@/contexts/auth-context";
 
 type InjectedWalletProvider = {
   request: (args: { method: string }) => Promise<unknown>;
+  isTrust?: boolean;
+  providers?: InjectedWalletProvider[];
 };
 
 declare global {
@@ -41,16 +43,32 @@ export default function WalletConnect() {
   const [address, setAddress] = useState("");
   const [isConnecting, setIsConnecting] = useState(false);
 
+  const getSelectedProvider = () => {
+    const injected = window.ethereum;
+    if (!injected) return null;
+
+    const providers = injected.providers?.length ? injected.providers : [injected];
+    if (selected === "Trust Wallet") {
+      return providers.find((provider) => provider.isTrust) ?? providers[0] ?? null;
+    }
+    return providers[0] ?? null;
+  };
+
   const handleConnect = async () => {
     setError("");
     if (!user || !selected) return;
-    if (!window.ethereum) {
-      setError("No browser wallet detected. Open this page in your wallet app or install its official browser extension.");
+    const provider = getSelectedProvider();
+    if (!provider) {
+      setError(
+        selected === "Trust Wallet"
+          ? "Open Smartledger in Trust Wallet’s in-app browser, or install the official Trust Wallet browser extension."
+          : "No browser wallet detected. Open this page in your wallet app or install its official browser extension.",
+      );
       return;
     }
     setIsConnecting(true);
     try {
-      const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+      const accounts = await provider.request({ method: "eth_requestAccounts" });
       const walletAddress = Array.isArray(accounts) ? accounts[0] : "";
       if (typeof walletAddress !== "string" || !walletAddress) {
         setError("Your wallet did not return a public address.");
