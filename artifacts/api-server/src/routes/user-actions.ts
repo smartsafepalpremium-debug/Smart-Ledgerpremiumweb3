@@ -13,6 +13,7 @@ import { accrueUserInvestments } from "../lib/investment-accrual";
 import {
   sendWelcomeEmail, sendDepositRequestToAdmin,
   sendWithdrawalRequestToAdmin,
+  sendUserMessageToAdmin,
 } from "../lib/email";
 
 const router = Router();
@@ -77,6 +78,55 @@ router.post("/login", async (req: Request, res: Response) => {
     res.json({ token, user: safeUser(refreshedUser ?? user) });
   } catch (err) {
     req.log.error({ err }, "loginUser error");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.post("/contact-message", requireUser, async (req: Request, res: Response) => {
+  const { userId } = (req as AuthedReq).user;
+  const { subject, message } = req.body as { subject?: unknown; message?: unknown };
+
+  if (typeof subject !== "string" || typeof message !== "string") {
+    res.status(400).json({ error: "Enter a subject and message" });
+    return;
+  }
+
+  const cleanSubject = subject.trim().replace(/[\r\n]+/g, " ");
+  const cleanMessage = message.trim();
+  if (cleanSubject.length < 3 || cleanSubject.length > 120) {
+    res.status(400).json({ error: "Subject must be between 3 and 120 characters" });
+    return;
+  }
+  if (cleanMessage.length < 1 || cleanMessage.length > 5000) {
+    res.status(400).json({ error: "Message must be between 1 and 5,000 characters" });
+    return;
+  }
+
+  try {
+    const [user] = await db.select().from(usersTable).where(eq(usersTable.id, userId));
+    if (!user) {
+      res.status(404).json({ error: "User not found" });
+      return;
+    }
+
+    const [settings] = await db.select().from(settingsTable).limit(1);
+    const adminEmail = settings?.adminEmail?.trim() || "smartsafepalpremium@gmail.com";
+    const sent = await sendUserMessageToAdmin(
+      adminEmail,
+      `${user.firstName} ${user.lastName}`,
+      user.email,
+      cleanSubject,
+      cleanMessage,
+    );
+
+    if (!sent) {
+      res.status(503).json({ error: "Message could not be sent right now. Please try again later." });
+      return;
+    }
+
+    res.status(202).json({ success: true });
+  } catch (err) {
+    req.log.error({ err, userId }, "sendUserContactMessage error");
     res.status(500).json({ error: "Internal server error" });
   }
 });

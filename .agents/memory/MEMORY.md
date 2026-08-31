@@ -2,3 +2,4 @@
 - [Wouter nested routing pitfall](wouter-routing.md) — Route path="/" in a Switch only matches exact "/", not sub-paths; use flat routes or wildcards
 - [Admin JWT auth pattern](admin-jwt.md) — admin credentials hardcoded in middleware, no DB lookup; JWT signed with SESSION_SECRET env var
 - [SMTP credential precedence](smtp-credentials.md) — server SMTP secrets must override stale database settings so Gmail app-password rotations take effect
+- [User support messaging](user-support-messaging.md) — dashboard support messages use protected SMTP delivery to the configured admin email with direct replies
