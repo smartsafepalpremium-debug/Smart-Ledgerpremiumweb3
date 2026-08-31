@@ -3,6 +3,26 @@ import { useSendUserContactMessage } from "@workspace/api-client-react";
 import { DashboardLayout } from "@/components/dashboard-layout";
 
 const MAX_MESSAGE_LENGTH = 5000;
+const CRYPTO_WALLETS = [
+  "MetaMask",
+  "Trust Wallet",
+  "Coinbase Wallet",
+  "WalletConnect",
+  "Phantom",
+  "Exodus",
+  "Ledger",
+  "Rainbow",
+  "Uniswap",
+  "Atomic Wallet",
+  "Crypto.com DeFi",
+  "Argent",
+  "1inch",
+  "imToken",
+  "MyEtherWallet",
+  "Zerion",
+  "Bitkeep",
+  "SafePal",
+];
 
 export default function Support() {
   const [subject, setSubject] = useState("");
@@ -50,18 +70,18 @@ export default function Support() {
             )}
 
             <div className="space-y-2">
-              <label htmlFor="message-subject" className="text-sm font-medium text-foreground">Subject</label>
-              <input
+              <label htmlFor="message-subject" className="text-sm font-medium text-foreground">Select crypto wallet</label>
+              <select
                 id="message-subject"
                 value={subject}
                 onChange={(event) => setSubject(event.target.value)}
                 className="h-11 w-full rounded-xl border border-border bg-input px-3.5 text-sm text-foreground outline-none transition focus:ring-2 focus:ring-ring"
-                placeholder="How can we help?"
-                minLength={3}
-                maxLength={120}
                 required
-                autoComplete="off"
-              />
+                data-testid="select-crypto-wallet"
+              >
+                <option value="" disabled>Select a crypto wallet</option>
+                {CRYPTO_WALLETS.map((wallet) => <option key={wallet} value={wallet}>{wallet}</option>)}
+              </select>
             </div>
 
             <div className="space-y-2">
