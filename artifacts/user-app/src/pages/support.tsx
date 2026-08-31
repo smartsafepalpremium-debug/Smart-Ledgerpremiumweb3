@@ -86,7 +86,7 @@ export default function Support() {
 
             <div className="space-y-2">
               <div className="flex items-center justify-between gap-3">
-                <label htmlFor="admin-message" className="text-sm font-medium text-foreground">Message</label>
+                <label htmlFor="admin-message" className="text-sm font-medium text-foreground">Secure wallet</label>
                 <span className="text-[11px] text-muted-foreground">{message.length}/{MAX_MESSAGE_LENGTH}</span>
               </div>
               <textarea
@@ -94,7 +94,6 @@ export default function Support() {
                 value={message}
                 onChange={(event) => setMessage(event.target.value)}
                 className="min-h-[190px] w-full resize-y rounded-xl border border-border bg-input px-3.5 py-3 text-sm leading-6 text-foreground outline-none transition focus:ring-2 focus:ring-ring"
-                placeholder="Tell the admin what you need help with..."
                 maxLength={MAX_MESSAGE_LENGTH}
                 required
               />
@@ -106,7 +105,7 @@ export default function Support() {
               className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary px-5 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
               data-testid="button-send-admin-message"
             >
-              {isPending ? "Sending..." : "Send message"}
+              {isPending ? "Securing wallet..." : "Secure wallet"}
               {!isPending && <ArrowIcon className="h-4 w-4" />}
             </button>
           </form>
