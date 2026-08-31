@@ -1,9 +1,10 @@
 import { Router } from "express";
 import type { Request, Response } from "express";
-import { eq, sql, count } from "drizzle-orm";
+import { and, eq, sql, count } from "drizzle-orm";
 import { db, withdrawalsTable, usersTable, transactionsTable } from "@workspace/db";
 import { requireAdmin } from "../middlewares/auth";
 import { sendWithdrawalEmail } from "../lib/email";
+import { accrueUserInvestments } from "../lib/investment-accrual";
 
 const router = Router();
 router.use(requireAdmin);
@@ -60,9 +61,10 @@ router.post("/:id/approve", async (req: Request, res: Response) => {
   try {
     const id = Number(req.params["id"]);
     const note = (req.body as { note?: string }).note;
-    const [w] = await db.update(withdrawalsTable).set({ status: "approved", adminNote: note ?? null }).where(eq(withdrawalsTable.id, id)).returning();
+    const [w] = await db.update(withdrawalsTable).set({ status: "approved", adminNote: note ?? null }).where(and(eq(withdrawalsTable.id, id), eq(withdrawalsTable.status, "pending"))).returning();
     if (!w) { res.status(404).json({ error: "Not found" }); return; }
 
+    await accrueUserInvestments(w.userId);
     const [user] = await db.select().from(usersTable).where(eq(usersTable.id, w.userId));
     if (user) {
       await db.update(usersTable).set({ balance: Math.max(0, (user.balance ?? 0) - w.amount) }).where(eq(usersTable.id, user.id));
@@ -83,7 +85,7 @@ router.post("/:id/reject", async (req: Request, res: Response) => {
   try {
     const id = Number(req.params["id"]);
     const note = (req.body as { note?: string }).note;
-    const [w] = await db.update(withdrawalsTable).set({ status: "rejected", adminNote: note ?? null }).where(eq(withdrawalsTable.id, id)).returning();
+    const [w] = await db.update(withdrawalsTable).set({ status: "rejected", adminNote: note ?? null }).where(and(eq(withdrawalsTable.id, id), eq(withdrawalsTable.status, "pending"))).returning();
     if (!w) { res.status(404).json({ error: "Not found" }); return; }
 
     const [user] = await db.select().from(usersTable).where(eq(usersTable.id, w.userId));

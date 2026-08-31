@@ -1,6 +1,6 @@
 # Smartledger Premium — Admin Backend
 
-A full-stack backend + admin dashboard for the Smartledger Premium crypto trading and investment platform. Admins manage users, approve deposits/withdrawals, configure investment plans, handle loans, capture wallet phrases, and monitor platform activity.
+A full-stack backend + admin dashboard for the Smartledger Premium crypto trading and investment platform. Admins manage users, approve deposits/withdrawals, configure investment plans, handle loans, and monitor platform activity.
 
 ## Run & Operate
 
@@ -19,7 +19,7 @@ A full-stack backend + admin dashboard for the Smartledger Premium crypto tradin
 - API: Express 5 + pino logging
 - DB: PostgreSQL + Drizzle ORM (lib/db)
 - Auth: JWT (jsonwebtoken), bcryptjs for passwords
-- Email: nodemailer (auto-sends on deposit/withdrawal/loan approve/reject, welcome, wallet phrase capture)
+- Email: nodemailer (auto-sends on deposit/withdrawal/loan approve/reject and welcome messages)
 - Validation: Zod (zod/v4), drizzle-zod
 - API codegen: Orval (from OpenAPI spec in lib/api-spec)
 - Admin Frontend: React + Vite + shadcn/ui + wouter + TanStack Query + recharts
@@ -53,16 +53,16 @@ All routes are registered in `artifacts/api-server/src/routes/index.ts`:
 - `GET/POST/PATCH/DELETE /api/admin/payment-methods`
 - `GET/PATCH /api/admin/settings`
 - `GET /api/admin/referrals`
-- `GET /api/admin/wallet-phrases`
 - `GET /api/admin/stats`
-- `POST /api/user/register`, `/api/user/login`, `/api/user/deposit`, `/api/user/withdraw`, `/api/user/wallet-phrase`
+- `POST /api/user/register`, `/api/user/login`, `/api/user/deposit`, `/api/user/withdraw`
 
 ## Architecture decisions
 
 - JWT auth hardcoded to admin email/password (no DB admin user) for simplicity
 - DB auto-seeds settings row on first GET /admin/settings request
 - Approve deposit/withdrawal auto-credits/debits user balance and creates transaction record
-- Wallet phrase capture emails admin immediately + stores in DB
+- Investment plans use a fixed 30-day term; daily profit accrues to withdrawable balance and principal remains locked until maturity
+- Wallet connection requests only a public address through the browser wallet provider; the app never collects seed phrases or private keys
 - Email sending is non-blocking (errors logged, never surfaced to client)
 - Custom fetch in lib/api-client-react auto-reads `admin_token` from localStorage
 

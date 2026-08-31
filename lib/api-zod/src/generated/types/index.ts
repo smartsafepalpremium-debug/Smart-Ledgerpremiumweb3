@@ -51,8 +51,6 @@ export * from './userPortfolio';
 export * from './userProfileUpdate';
 export * from './userRegisterInput';
 export * from './userUpdate';
-export * from './walletPhrase';
-export * from './walletPhraseInput';
 export * from './withdrawal';
 export * from './withdrawalInput';
 export * from './withdrawalListResult';

@@ -49,7 +49,7 @@ export default function Overview() {
     return () => window.clearInterval(id);
   }, []);
 
-  const balance = (portfolio as any)?.balance ?? user?.balance ?? 0;
+  const balance = (portfolio as any)?.withdrawableBalance ?? (portfolio as any)?.balance ?? user?.balance ?? 0;
   const profit = (portfolio as any)?.profit ?? user?.profit ?? 0;
   const positive = profit >= 0;
 
@@ -73,18 +73,23 @@ export default function Overview() {
             <div className="relative flex h-full flex-col justify-between">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="sl-kicker text-primary-foreground/65">Total balance</p>
+                   <p className="sl-kicker text-primary-foreground/65">Withdrawable balance</p>
                   {portfolioLoading ? <div className="mt-3 h-10 w-48 animate-pulse rounded bg-primary-foreground/15" /> : <p className="sl-mono mt-3 text-4xl font-medium tracking-[-.08em] sm:text-5xl">{money(balance)}</p>}
                 </div>
                 <div className="rounded-full border border-primary-foreground/25 bg-primary-foreground/10 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[.14em]">USD account</div>
               </div>
               <div className="relative mt-10 flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
-                <div>
+                 <div>
                   <p className="sl-kicker text-primary-foreground/65">Net performance</p>
                   <div className="mt-1 flex items-baseline gap-2">
                     <span className="sl-mono text-lg font-medium">{positive ? "+" : ""}{money(profit)}</span>
                     <span className="text-xs text-primary-foreground/65">since inception</span>
                   </div>
+                 <div className="text-right">
+                   <p className="sl-kicker text-primary-foreground/65">Locked capital</p>
+                   <p className="sl-mono mt-1 text-sm font-medium">{money((portfolio as any)?.lockedCapital ?? 0)}</p>
+                   <p className="text-[10px] text-primary-foreground/65">Releases at maturity</p>
+                 </div>
                 </div>
                 <div className="flex gap-2">
                   <Link href="/deposit" data-testid="link-dashboard-deposit" className="flex items-center gap-2 rounded-lg bg-[#15150f] px-4 py-2.5 text-xs font-bold text-primary transition-transform hover:-translate-y-0.5"><span>Deposit</span><ArrowIcon className="h-3.5 w-3.5" /></Link>

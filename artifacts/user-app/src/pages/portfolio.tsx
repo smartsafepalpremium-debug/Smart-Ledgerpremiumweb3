@@ -23,8 +23,9 @@ export default function Portfolio() {
   const { data: withdrawals } = useGetUserWithdrawals({});
 
   const p = portfolio as any;
-  const balance = p?.balance ?? user?.balance ?? 0;
+  const balance = p?.withdrawableBalance ?? p?.balance ?? user?.balance ?? 0;
   const profit = p?.profit ?? user?.profit ?? 0;
+  const lockedCapital = p?.lockedCapital ?? 0;
 
   const recentDeposits = Array.isArray(deposits) ? deposits.slice(0, 5) : [];
   const recentWithdrawals = Array.isArray(withdrawals) ? withdrawals.slice(0, 5) : [];
@@ -53,13 +54,14 @@ export default function Portfolio() {
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <StatCard label="Balance" value={fmt(balance)} />
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+            <StatCard label="Withdrawable Balance" value={fmt(balance)} />
             <StatCard
               label="Total Profit"
               value={`${profit >= 0 ? "+" : ""}${fmt(profit)}`}
               valueClass={profit >= 0 ? "text-green-400" : "text-red-400"}
             />
+            <StatCard label="Locked Capital" value={fmt(lockedCapital)} sub="Unlocks at maturity" />
             <StatCard label="Total Deposited" value={fmt(p?.totalDeposited ?? 0)} />
             <StatCard label="Total Withdrawn" value={fmt(p?.totalWithdrawn ?? 0)} />
           </div>

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useGetUserWithdrawals, useSubmitWithdrawal, useGetUserPaymentMethods } from "@workspace/api-client-react";
+import { useGetUserWithdrawals, useSubmitWithdrawal, useGetUserPaymentMethods, useGetUserPortfolio } from "@workspace/api-client-react";
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { useAuth } from "@/contexts/auth-context";
 
@@ -15,8 +15,9 @@ const statusColor: Record<string, string> = {
 
 export default function Withdraw() {
   const { user } = useAuth();
-  const { data: withdrawals } = useGetUserWithdrawals({});
+  const { data: withdrawals, refetch: refetchWithdrawals } = useGetUserWithdrawals({});
   const { data: methods } = useGetUserPaymentMethods({});
+  const { data: portfolio, refetch: refetchPortfolio } = useGetUserPortfolio({});
   const [amount, setAmount] = useState("");
   const [selectedMethod, setSelectedMethod] = useState("");
   const [walletAddress, setWalletAddress] = useState("");
@@ -25,10 +26,18 @@ export default function Withdraw() {
 
   const withdrawalList = Array.isArray(withdrawals) ? withdrawals : [];
   const methodList = Array.isArray(methods) ? methods : [];
+  const withdrawableBalance = Number((portfolio as any)?.withdrawableBalance ?? user?.balance ?? 0);
+  const lockedCapital = Number((portfolio as any)?.lockedCapital ?? 0);
 
   const { mutate, isPending } = useSubmitWithdrawal({
     mutation: {
-      onSuccess: () => { setSuccess(true); setAmount(""); setWalletAddress(""); },
+      onSuccess: () => {
+        setSuccess(true);
+        setAmount("");
+        setWalletAddress("");
+        refetchWithdrawals();
+        refetchPortfolio();
+      },
       onError: (err: any) => setError(err?.data?.error ?? "Withdrawal failed"),
     },
   });
@@ -76,8 +85,11 @@ export default function Withdraw() {
           <div className="space-y-4">
             {user && (
               <div className="bg-card border border-border rounded-xl p-5">
-                <p className="text-xs text-muted-foreground uppercase tracking-widest">Available Balance</p>
-                <p className="text-2xl font-bold text-foreground mt-1">{fmt(user.balance ?? 0)}</p>
+                 <p className="text-xs text-muted-foreground uppercase tracking-widest">Withdrawable Balance</p>
+                 <p className="text-2xl font-bold text-foreground mt-1">{fmt(withdrawableBalance)}</p>
+                 {lockedCapital > 0 && (
+                   <p className="text-xs text-yellow-400 mt-2">{fmt(lockedCapital)} capital locked in active 30-day investments</p>
+                 )}
               </div>
             )}
 
@@ -93,7 +105,8 @@ export default function Withdraw() {
                     onChange={(e) => setAmount(e.target.value)}
                     className="w-full h-10 px-3 rounded-lg bg-input border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                     placeholder="0.00"
-                    min="0"
+                     min="0"
+                     max={withdrawableBalance}
                     step="0.01"
                     required
                   />
@@ -123,8 +136,8 @@ export default function Withdraw() {
                     required
                   />
                 </div>
-                <div className="bg-yellow-400/10 border border-yellow-400/20 rounded-lg px-4 py-3 text-xs text-yellow-400">
-                  Withdrawals are reviewed manually. Processing takes 1-3 business days. Ensure your wallet address is correct.
+                 <div className="bg-yellow-400/10 border border-yellow-400/20 rounded-lg px-4 py-3 text-xs text-yellow-400">
+                   Only your withdrawable balance can be requested. Investment capital stays locked until its 30-day term ends.
                 </div>
                 <button
                   type="submit"

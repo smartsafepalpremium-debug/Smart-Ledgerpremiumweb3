@@ -11,6 +11,8 @@ export const investmentsTable = pgTable("investments", {
   roiPercent: real("roi_percent").notNull(),
   durationDays: integer("duration_days").notNull(),
   expectedReturn: real("expected_return").notNull(),
+  profitPaidDays: integer("profit_paid_days").notNull().default(0),
+  profitPaid: real("profit_paid").notNull().default(0),
   status: text("status").notNull().default("active"),
   maturesAt: timestamp("matures_at", { withTimezone: true }).notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),

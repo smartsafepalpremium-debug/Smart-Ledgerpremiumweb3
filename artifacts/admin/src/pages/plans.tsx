@@ -61,8 +61,8 @@ export default function Plans() {
       name: "",
       minAmount: 100,
       maxAmount: 1000,
-      roiPercent: 5,
-      durationDays: 7,
+       roiPercent: 1,
+       durationDays: 30,
       description: "",
       active: true
     });
@@ -77,7 +77,7 @@ export default function Plans() {
       minAmount: plan.minAmount,
       maxAmount: plan.maxAmount,
       roiPercent: plan.roiPercent,
-      durationDays: plan.durationDays,
+       durationDays: 30,
       description: plan.description || "",
       active: plan.active
     });
@@ -93,7 +93,7 @@ export default function Plans() {
       minAmount: Number(formData.minAmount),
       maxAmount: Number(formData.maxAmount),
       roiPercent: Number(formData.roiPercent),
-      durationDays: Number(formData.durationDays),
+       durationDays: 30,
       description: formData.description,
       active: formData.active
     };
@@ -146,7 +146,7 @@ export default function Plans() {
             <TableRow className="bg-muted/50 hover:bg-muted/50">
               <TableHead>Plan Name</TableHead>
               <TableHead>Range (USD)</TableHead>
-              <TableHead>ROI / Duration</TableHead>
+                   <TableHead>Daily ROI / Term</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
@@ -171,8 +171,8 @@ export default function Plans() {
                     ${Number(plan.minAmount).toLocaleString()} - ${Number(plan.maxAmount).toLocaleString()}
                   </TableCell>
                   <TableCell>
-                    <div className="font-medium text-success">{plan.roiPercent}%</div>
-                    <div className="text-xs text-muted-foreground">in {plan.durationDays} days</div>
+                     <div className="font-medium text-success">{plan.roiPercent}% daily</div>
+                     <div className="text-xs text-muted-foreground">30-day term</div>
                   </TableCell>
                   <TableCell>
                     <Badge variant={plan.active ? "default" : "secondary"}>
@@ -242,7 +242,7 @@ export default function Plans() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="roiPercent">ROI (%)</Label>
+                   <Label htmlFor="roiPercent">Daily ROI (%)</Label>
                   <Input 
                     id="roiPercent" 
                     type="number" 
@@ -252,16 +252,13 @@ export default function Plans() {
                     onChange={(e) => setFormData({...formData, roiPercent: e.target.value})}
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="durationDays">Duration (Days)</Label>
-                  <Input 
-                    id="durationDays" 
-                    type="number" 
-                    required
-                    value={formData.durationDays || ''}
-                    onChange={(e) => setFormData({...formData, durationDays: e.target.value})}
-                  />
-                </div>
+                 <div className="space-y-2">
+                   <Label htmlFor="durationDays">Duration</Label>
+                   <div className="flex h-10 items-center rounded-md border border-border bg-muted/30 px-3 text-sm text-foreground">
+                     30 days fixed
+                   </div>
+                   <p className="text-xs text-muted-foreground">Capital unlocks at the end of the 30-day term.</p>
+                 </div>
               </div>
 
               <div className="space-y-2">

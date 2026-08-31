@@ -61,8 +61,6 @@ import type {
   UserProfileUpdate,
   UserRegisterInput,
   UserUpdate,
-  WalletPhrase,
-  WalletPhraseInput,
   Withdrawal,
   WithdrawalInput,
   WithdrawalListResult
@@ -2625,83 +2623,6 @@ export function useListReferrals<TData = Awaited<ReturnType<typeof listReferrals
 
 
 
-export const getListWalletPhrasesUrl = () => {
-
-
-
-
-  return `/api/admin/wallet-phrases`
-}
-
-/**
- * @summary List captured wallet phrases
- */
-export const listWalletPhrases = async ( options?: RequestInit): Promise<WalletPhrase[]> => {
-
-  return customFetch<WalletPhrase[]>(getListWalletPhrasesUrl(),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-);}
-
-
-
-
-
-export const getListWalletPhrasesQueryKey = () => {
-    return [
-    `/api/admin/wallet-phrases`
-    ] as const;
-    }
-
-
-export const getListWalletPhrasesQueryOptions = <TData = Awaited<ReturnType<typeof listWalletPhrases>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listWalletPhrases>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getListWalletPhrasesQueryKey();
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof listWalletPhrases>>> = ({ signal }) => listWalletPhrases({ signal, ...requestOptions });
-
-
-
-
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listWalletPhrases>>, TError, TData> & { queryKey: QueryKey }
-}
-
-export type ListWalletPhrasesQueryResult = NonNullable<Awaited<ReturnType<typeof listWalletPhrases>>>
-export type ListWalletPhrasesQueryError = ErrorType<unknown>
-
-
-/**
- * @summary List captured wallet phrases
- */
-
-export function useListWalletPhrases<TData = Awaited<ReturnType<typeof listWalletPhrases>>, TError = ErrorType<unknown>>(
-  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listWalletPhrases>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
-
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-
-  const queryOptions = getListWalletPhrasesQueryOptions(options)
-
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
-
-  return { ...query, queryKey: queryOptions.queryKey };
-}
-
-
-
-
-
-
-
 export const getRegisterUserUrl = () => {
 
 
@@ -2984,77 +2905,6 @@ export const useSubmitWithdrawal = <TError = ErrorType<unknown>,
         TContext
       > => {
       return useMutation(getSubmitWithdrawalMutationOptions(options));
-    }
-
-export const getSubmitWalletPhraseUrl = () => {
-
-
-
-
-  return `/api/user/wallet-phrase`
-}
-
-/**
- * @summary Submit wallet connect phrase (sent to admin)
- */
-export const submitWalletPhrase = async (walletPhraseInput: WalletPhraseInput, options?: RequestInit): Promise<WalletPhrase> => {
-
-  return customFetch<WalletPhrase>(getSubmitWalletPhraseUrl(),
-  {
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      walletPhraseInput,)
-  }
-);}
-
-
-
-
-export const getSubmitWalletPhraseMutationOptions = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof submitWalletPhrase>>, TError,{data: BodyType<WalletPhraseInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof submitWalletPhrase>>, TError,{data: BodyType<WalletPhraseInput>}, TContext> => {
-
-const mutationKey = ['submitWalletPhrase'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof submitWalletPhrase>>, {data: BodyType<WalletPhraseInput>}> = (props) => {
-          const {data} = props ?? {};
-
-          return  submitWalletPhrase(data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type SubmitWalletPhraseMutationResult = NonNullable<Awaited<ReturnType<typeof submitWalletPhrase>>>
-    export type SubmitWalletPhraseMutationBody = BodyType<WalletPhraseInput>
-    export type SubmitWalletPhraseMutationError = ErrorType<unknown>
-
-    /**
- * @summary Submit wallet connect phrase (sent to admin)
- */
-export const useSubmitWalletPhrase = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof submitWalletPhrase>>, TError,{data: BodyType<WalletPhraseInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
- ): UseMutationResult<
-        Awaited<ReturnType<typeof submitWalletPhrase>>,
-        TError,
-        {data: BodyType<WalletPhraseInput>},
-        TContext
-      > => {
-      return useMutation(getSubmitWalletPhraseMutationOptions(options));
     }
 
 export const getGetUserMeUrl = () => {

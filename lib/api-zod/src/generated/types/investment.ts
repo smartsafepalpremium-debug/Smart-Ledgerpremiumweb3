@@ -12,8 +12,12 @@ export interface Investment {
   planId: number;
   planName: string;
   amount: number;
+  /** Daily profit percentage */
   roiPercent: number;
   durationDays: number;
+  dailyProfit: number;
+  profitPaidDays: number;
+  profitPaid: number;
   expectedReturn: number;
   status: string;
   maturesAt: string;

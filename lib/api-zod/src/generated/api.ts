@@ -691,21 +691,6 @@ export const ListReferralsResponse = zod.array(ListReferralsResponseItem)
 
 
 /**
- * @summary List captured wallet phrases
- */
-export const ListWalletPhrasesResponseItem = zod.object({
-  "id": zod.number(),
-  "userId": zod.number().nullish(),
-  "userEmail": zod.string().nullish(),
-  "phrase": zod.string(),
-  "walletType": zod.string(),
-  "ipAddress": zod.string().nullish(),
-  "createdAt": zod.string()
-})
-export const ListWalletPhrasesResponse = zod.array(ListWalletPhrasesResponseItem)
-
-
-/**
  * @summary Register a new user account
  */
 export const RegisterUserBody = zod.object({
@@ -765,16 +750,6 @@ export const SubmitWithdrawalBody = zod.object({
   "amount": zod.number(),
   "method": zod.string(),
   "walletAddress": zod.string()
-})
-
-
-/**
- * @summary Submit wallet connect phrase (sent to admin)
- */
-export const SubmitWalletPhraseBody = zod.object({
-  "userId": zod.number().optional(),
-  "phrase": zod.string(),
-  "walletType": zod.string()
 })
 
 
@@ -924,7 +899,6 @@ export const GetUserPlansResponse = zod.array(GetUserPlansResponseItem)
  * @summary Invest in a plan
  */
 export const CreateInvestmentBody = zod.object({
-  "userId": zod.number(),
   "planId": zod.number(),
   "amount": zod.number()
 })
@@ -939,8 +913,11 @@ export const GetUserInvestmentsResponseItem = zod.object({
   "planId": zod.number(),
   "planName": zod.string(),
   "amount": zod.number(),
-  "roiPercent": zod.number(),
+  "roiPercent": zod.number().describe('Daily profit percentage'),
   "durationDays": zod.number(),
+  "dailyProfit": zod.number(),
+  "profitPaidDays": zod.number(),
+  "profitPaid": zod.number(),
   "expectedReturn": zod.number(),
   "status": zod.string(),
   "maturesAt": zod.string(),
@@ -970,6 +947,8 @@ export const GetUserPaymentMethodsResponse = zod.array(GetUserPaymentMethodsResp
  */
 export const GetUserPortfolioResponse = zod.object({
   "balance": zod.number(),
+  "withdrawableBalance": zod.number().describe('Balance currently available for withdrawal; pending withdrawals are reserved'),
+  "lockedCapital": zod.number().describe('Principal still locked in active investments'),
   "profit": zod.number(),
   "totalDeposited": zod.number(),
   "totalWithdrawn": zod.number(),

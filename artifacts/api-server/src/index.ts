@@ -1,5 +1,6 @@
 import app from "./app";
 import { logger } from "./lib/logger";
+import { accrueAllActiveInvestments } from "./lib/investment-accrual";
 
 const rawPort = process.env["PORT"];
 
@@ -22,4 +23,12 @@ app.listen(port, (err) => {
   }
 
   logger.info({ port }, "Server listening");
+  const runAccrualSweep = () => {
+    void accrueAllActiveInvestments()
+      .then((userCount) => logger.debug({ userCount }, "Investment accrual sweep completed"))
+      .catch((sweepError) => logger.error({ err: sweepError }, "Investment accrual sweep failed"));
+  };
+  runAccrualSweep();
+  const accrualTimer = setInterval(runAccrualSweep, 60 * 60 * 1000);
+  accrualTimer.unref();
 });

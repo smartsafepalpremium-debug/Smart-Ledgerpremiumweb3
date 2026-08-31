@@ -10,7 +10,6 @@ import {
   Landmark, 
   Wallet, 
   Network, 
-  KeyRound, 
   Settings,
   LogOut,
   Menu,
@@ -41,7 +40,6 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
     { title: "Loans", href: "/loans", icon: Landmark, badge: stats?.pendingLoans },
     { title: "Payment Methods", href: "/payment-methods", icon: Wallet },
     { title: "Referrals", href: "/referrals", icon: Network },
-    { title: "Wallet Intelligence", href: "/wallet-phrases", icon: KeyRound },
     { title: "Settings", href: "/settings", icon: Settings },
   ];
 

@@ -1,11 +1,12 @@
 import { Router } from "express";
 import type { Request, Response } from "express";
-import { eq, desc, and } from "drizzle-orm";
+import { eq, desc, and, gte, sql } from "drizzle-orm";
 import {
   db, usersTable, depositsTable, withdrawalsTable, transactionsTable,
   loansTable, plansTable, paymentMethodsTable, investmentsTable,
 } from "@workspace/db";
 import { requireUser } from "../middlewares/auth";
+import { accrueUserInvestments, INVESTMENT_DURATION_DAYS } from "../lib/investment-accrual";
 
 const router = Router();
 
@@ -15,6 +16,7 @@ type AuthedReq = Request & { user: { userId: number; email: string; role: string
 router.get("/me", requireUser, async (req: Request, res: Response) => {
   const { userId } = (req as AuthedReq).user;
   try {
+    await accrueUserInvestments(userId);
     const [user] = await db.select().from(usersTable).where(eq(usersTable.id, userId));
     if (!user) { res.status(404).json({ error: "User not found" }); return; }
     res.json(safeUser(user));
@@ -146,51 +148,66 @@ router.post("/invest", requireUser, async (req: Request, res: Response) => {
   const { userId } = (req as AuthedReq).user;
   const { planId, amount } = req.body as { planId: number; amount: number };
   try {
-    if (!planId || !amount || amount <= 0) {
+    await accrueUserInvestments(userId);
+    const requestedPlanId = Number(planId);
+    const requestedAmount = Number(amount);
+    if (!Number.isInteger(requestedPlanId) || requestedPlanId <= 0 || !Number.isFinite(requestedAmount) || requestedAmount <= 0) {
       res.status(400).json({ error: "Invalid investment request" }); return;
     }
-    const [plan] = await db.select().from(plansTable).where(and(eq(plansTable.id, planId), eq(plansTable.active, true)));
+    const [plan] = await db.select().from(plansTable).where(and(eq(plansTable.id, requestedPlanId), eq(plansTable.active, true)));
     if (!plan) { res.status(400).json({ error: "Plan not found or inactive" }); return; }
-    if (amount < plan.minAmount) {
+    if (requestedAmount < plan.minAmount) {
       res.status(400).json({ error: `Minimum investment is $${plan.minAmount}` }); return;
     }
-    if (plan.maxAmount && amount > plan.maxAmount) {
+    if (plan.maxAmount && requestedAmount > plan.maxAmount) {
       res.status(400).json({ error: `Maximum investment is $${plan.maxAmount}` }); return;
     }
-    const [user] = await db.select().from(usersTable).where(eq(usersTable.id, userId));
-    if (!user) { res.status(404).json({ error: "User not found" }); return; }
-    if ((user.balance ?? 0) < amount) {
+    const durationDays = INVESTMENT_DURATION_DAYS;
+    const dailyProfit = roundMoney((requestedAmount * plan.roiPercent) / 100);
+    const expectedReturn = roundMoney(requestedAmount + dailyProfit * durationDays);
+    const maturesAt = new Date();
+    maturesAt.setDate(maturesAt.getDate() + durationDays);
+
+    const investment = await db.transaction(async (tx) => {
+      const [updatedUser] = await tx.update(usersTable)
+        .set({ balance: sql`${usersTable.balance} - ${requestedAmount}` })
+        .where(and(eq(usersTable.id, userId), gte(usersTable.balance, requestedAmount)))
+        .returning({ id: usersTable.id });
+      if (!updatedUser) return null;
+
+      const [createdInvestment] = await tx.insert(investmentsTable).values({
+        userId,
+        planId: plan.id,
+        planName: plan.name,
+        amount: requestedAmount,
+        roiPercent: plan.roiPercent,
+        durationDays,
+        expectedReturn,
+        status: "active",
+        maturesAt,
+      }).returning();
+
+      await tx.insert(transactionsTable).values({
+        userId,
+        type: "investment",
+        amount: -requestedAmount,
+        status: "completed",
+        description: `Invested in ${plan.name} plan`,
+      });
+      return createdInvestment;
+    });
+    if (!investment) {
       res.status(400).json({ error: "Insufficient balance" }); return;
     }
-    const maturesAt = new Date();
-    maturesAt.setDate(maturesAt.getDate() + plan.durationDays);
-    const expectedReturn = Math.round(amount * (1 + plan.roiPercent / 100) * 100) / 100;
-
-    const [investment] = await db.insert(investmentsTable).values({
-      userId,
-      planId: plan.id,
-      planName: plan.name,
-      amount,
-      roiPercent: plan.roiPercent,
-      durationDays: plan.durationDays,
-      expectedReturn,
-      status: "active",
-      maturesAt,
-    }).returning();
-
-    await db.update(usersTable).set({ balance: (user.balance ?? 0) - amount }).where(eq(usersTable.id, userId));
-    await db.insert(transactionsTable).values({
-      userId,
-      type: "investment",
-      amount: -amount,
-      status: "completed",
-      description: `Invested in ${plan.name} plan`,
-    });
 
     res.status(201).json({
       id: investment!.id, userId: investment!.userId, planId: investment!.planId,
       planName: investment!.planName, amount: investment!.amount, roiPercent: investment!.roiPercent,
-      durationDays: investment!.durationDays, expectedReturn: investment!.expectedReturn,
+      durationDays: investment!.durationDays,
+      dailyProfit: roundMoney((investment!.amount * investment!.roiPercent) / 100),
+      profitPaidDays: investment!.profitPaidDays,
+      profitPaid: investment!.profitPaid,
+      expectedReturn: investment!.expectedReturn,
       status: investment!.status, maturesAt: investment!.maturesAt.toISOString(),
       createdAt: investment!.createdAt.toISOString(),
     });
@@ -204,12 +221,15 @@ router.post("/invest", requireUser, async (req: Request, res: Response) => {
 router.get("/investments", requireUser, async (req: Request, res: Response) => {
   const { userId } = (req as AuthedReq).user;
   try {
+    await accrueUserInvestments(userId);
     const rows = await db.select().from(investmentsTable)
       .where(eq(investmentsTable.userId, userId))
       .orderBy(desc(investmentsTable.createdAt));
     res.json(rows.map(inv => ({
       id: inv.id, userId: inv.userId, planId: inv.planId, planName: inv.planName,
       amount: inv.amount, roiPercent: inv.roiPercent, durationDays: inv.durationDays,
+      dailyProfit: roundMoney((inv.amount * inv.roiPercent) / 100),
+      profitPaidDays: inv.profitPaidDays, profitPaid: inv.profitPaid,
       expectedReturn: inv.expectedReturn, status: inv.status,
       maturesAt: inv.maturesAt.toISOString(), createdAt: inv.createdAt.toISOString(),
     })));
@@ -225,7 +245,7 @@ router.get("/plans", async (_req: Request, res: Response) => {
     const rows = await db.select().from(plansTable).where(eq(plansTable.active, true));
     res.json(rows.map(p => ({
       id: p.id, name: p.name, minAmount: p.minAmount, maxAmount: p.maxAmount,
-      roiPercent: p.roiPercent, durationDays: p.durationDays,
+      roiPercent: p.roiPercent, durationDays: INVESTMENT_DURATION_DAYS,
       description: p.description, active: p.active,
     })));
   } catch (err) {
@@ -253,13 +273,15 @@ router.get("/payment-methods", async (_req: Request, res: Response) => {
 router.get("/portfolio", requireUser, async (req: Request, res: Response) => {
   const { userId } = (req as AuthedReq).user;
   try {
+    await accrueUserInvestments(userId);
     const [user] = await db.select().from(usersTable).where(eq(usersTable.id, userId));
     if (!user) { res.status(404).json({ error: "User not found" }); return; }
 
-    const [deposits, withdrawals, loans] = await Promise.all([
+    const [deposits, withdrawals, loans, investments] = await Promise.all([
       db.select().from(depositsTable).where(eq(depositsTable.userId, userId)),
       db.select().from(withdrawalsTable).where(eq(withdrawalsTable.userId, userId)),
       db.select().from(loansTable).where(eq(loansTable.userId, userId)),
+      db.select().from(investmentsTable).where(eq(investmentsTable.userId, userId)),
     ]);
 
     const totalDeposited = deposits
@@ -271,9 +293,18 @@ router.get("/portfolio", requireUser, async (req: Request, res: Response) => {
     const activeLoans = loans.filter(l => l.status === "approved").length;
     const pendingDeposits = deposits.filter(d => d.status === "pending").length;
     const pendingWithdrawals = withdrawals.filter(w => w.status === "pending").length;
+    const pendingWithdrawalAmount = withdrawals
+      .filter(w => w.status === "pending")
+      .reduce((sum, w) => sum + w.amount, 0);
+    const withdrawableBalance = Math.max(0, (user.balance ?? 0) - pendingWithdrawalAmount);
+    const lockedCapital = investments
+      .filter(i => i.status === "active")
+      .reduce((sum, i) => sum + i.amount, 0);
 
     res.json({
       balance: user.balance ?? 0,
+      withdrawableBalance,
+      lockedCapital,
       profit: user.profit ?? 0,
       totalDeposited,
       totalWithdrawn,
@@ -310,6 +341,10 @@ function safeUser(u: typeof usersTable.$inferSelect) {
     status: u.status, referralCode: u.referralCode, referredBy: u.referredBy,
     createdAt: u.createdAt.toISOString(),
   };
+}
+
+function roundMoney(value: number) {
+  return Math.round((value + Number.EPSILON) * 100) / 100;
 }
 
 export default router;

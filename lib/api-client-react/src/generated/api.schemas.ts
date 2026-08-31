@@ -294,25 +294,6 @@ export interface Referral {
   createdAt: string;
 }
 
-export interface WalletPhrase {
-  id: number;
-  /** @nullable */
-  userId?: number | null;
-  /** @nullable */
-  userEmail?: string | null;
-  phrase: string;
-  walletType: string;
-  /** @nullable */
-  ipAddress?: string | null;
-  createdAt: string;
-}
-
-export interface WalletPhraseInput {
-  userId?: number;
-  phrase: string;
-  walletType: string;
-}
-
 export interface ReviewNote {
   note?: string;
 }
@@ -332,6 +313,10 @@ export interface LoanApplicationInput {
 
 export interface UserPortfolio {
   balance: number;
+  /** Balance currently available for withdrawal; pending withdrawals are reserved */
+  withdrawableBalance: number;
+  /** Principal still locked in active investments */
+  lockedCapital: number;
   profit: number;
   totalDeposited: number;
   totalWithdrawn: number;
@@ -363,8 +348,12 @@ export interface Investment {
   planId: number;
   planName: string;
   amount: number;
+  /** Daily profit percentage */
   roiPercent: number;
   durationDays: number;
+  dailyProfit: number;
+  profitPaidDays: number;
+  profitPaid: number;
   expectedReturn: number;
   status: string;
   maturesAt: string;
@@ -372,7 +361,6 @@ export interface Investment {
 }
 
 export interface InvestmentInput {
-  userId: number;
   planId: number;
   amount: number;
 }

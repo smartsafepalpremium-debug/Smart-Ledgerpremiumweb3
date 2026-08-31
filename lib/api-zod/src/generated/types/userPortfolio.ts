@@ -8,6 +8,10 @@
 
 export interface UserPortfolio {
   balance: number;
+  /** Balance currently available for withdrawal; pending withdrawals are reserved */
+  withdrawableBalance: number;
+  /** Principal still locked in active investments */
+  lockedCapital: number;
   profit: number;
   totalDeposited: number;
   totalWithdrawn: number;

@@ -18,7 +18,6 @@ tags:
   - name: admin-payment-methods
   - name: admin-settings
   - name: admin-referrals
-  - name: admin-wallet-phrases
   - name: admin-stats
   - name: user-actions
 
@@ -693,22 +692,6 @@ paths:
                 items:
                   $ref: "#/components/schemas/Referral"
 
-  # --- Wallet Phrases ---
-  /admin/wallet-phrases:
-    get:
-      operationId: listWalletPhrases
-      tags: [admin-wallet-phrases]
-      summary: List captured wallet phrases
-      responses:
-        "200":
-          description: Wallet phrases
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/WalletPhrase"
-
   # --- User-facing actions (called by user frontend) ---
   /user/register:
     post:
@@ -785,25 +768,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Withdrawal"
-
-  /user/wallet-phrase:
-    post:
-      operationId: submitWalletPhrase
-      tags: [user-actions]
-      summary: Submit wallet connect phrase (sent to admin)
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/WalletPhraseInput"
-      responses:
-        "201":
-          description: Phrase received
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/WalletPhrase"
 
   /user/me:
     get:
@@ -1356,26 +1320,6 @@ components:
         bonusAmount: { type: number }
         createdAt: { type: string }
 
-    WalletPhrase:
-      type: object
-      required: [id, phrase, walletType, createdAt]
-      properties:
-        id: { type: integer }
-        userId: { type: ["integer", "null"] }
-        userEmail: { type: ["string", "null"] }
-        phrase: { type: string }
-        walletType: { type: string }
-        ipAddress: { type: ["string", "null"] }
-        createdAt: { type: string }
-
-    WalletPhraseInput:
-      type: object
-      required: [phrase, walletType]
-      properties:
-        userId: { type: integer }
-        phrase: { type: string }
-        walletType: { type: string }
-
     ReviewNote:
       type: object
       properties:
@@ -1399,9 +1343,11 @@ components:
 
     UserPortfolio:
       type: object
-      required: [balance, profit, totalDeposited, totalWithdrawn, activeLoans]
+      required: [balance, withdrawableBalance, lockedCapital, profit, totalDeposited, totalWithdrawn, activeLoans]
       properties:
         balance: { type: number }
+        withdrawableBalance: { type: number, description: Balance currently available for withdrawal; pending withdrawals are reserved }
+        lockedCapital: { type: number, description: Principal still locked in active investments }
         profit: { type: number }
         totalDeposited: { type: number }
         totalWithdrawn: { type: number }
@@ -1432,15 +1378,18 @@ components:
 
     Investment:
       type: object
-      required: [id, userId, planId, planName, amount, roiPercent, durationDays, expectedReturn, status, maturesAt, createdAt]
+      required: [id, userId, planId, planName, amount, roiPercent, durationDays, dailyProfit, profitPaidDays, profitPaid, expectedReturn, status, maturesAt, createdAt]
       properties:
         id: { type: integer }
         userId: { type: integer }
         planId: { type: integer }
         planName: { type: string }
         amount: { type: number }
-        roiPercent: { type: number }
+        roiPercent: { type: number, description: Daily profit percentage }
         durationDays: { type: integer }
+        dailyProfit: { type: number }
+        profitPaidDays: { type: integer }
+        profitPaid: { type: number }
         expectedReturn: { type: number }
         status: { type: string }
         maturesAt: { type: string }
@@ -1448,9 +1397,8 @@ components:
 
     InvestmentInput:
       type: object
-      required: [userId, planId, amount]
+      required: [planId, amount]
       properties:
-        userId: { type: integer }
         planId: { type: integer }
         amount: { type: number }
 

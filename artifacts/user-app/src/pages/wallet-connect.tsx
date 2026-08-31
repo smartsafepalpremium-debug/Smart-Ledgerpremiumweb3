@@ -1,7 +1,16 @@
 import { useState } from "react";
-import { useSubmitWalletPhrase } from "@workspace/api-client-react";
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { useAuth } from "@/contexts/auth-context";
+
+type InjectedWalletProvider = {
+  request: (args: { method: string }) => Promise<unknown>;
+};
+
+declare global {
+  interface Window {
+    ethereum?: InjectedWalletProvider;
+  }
+}
 
 const WALLETS = [
   { name: "MetaMask", color: "#E2761B", icon: MetaMaskIcon },
@@ -27,22 +36,33 @@ const WALLETS = [
 export default function WalletConnect() {
   const { user } = useAuth();
   const [selected, setSelected] = useState<string | null>(null);
-  const [phrase, setPhrase] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [address, setAddress] = useState("");
+  const [isConnecting, setIsConnecting] = useState(false);
 
-  const { mutate, isPending } = useSubmitWalletPhrase({
-    mutation: {
-      onSuccess: () => setSuccess(true),
-      onError: (err: any) => setError(err?.data?.error ?? "Connection failed"),
-    },
-  });
-
-  const handleConnect = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleConnect = async () => {
     setError("");
     if (!user || !selected) return;
-    mutate({ data: { userId: user.id, phrase, walletType: selected } });
+    if (!window.ethereum) {
+      setError("No browser wallet detected. Open this page in your wallet app or install its official browser extension.");
+      return;
+    }
+    setIsConnecting(true);
+    try {
+      const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+      const walletAddress = Array.isArray(accounts) ? accounts[0] : "";
+      if (typeof walletAddress !== "string" || !walletAddress) {
+        setError("Your wallet did not return a public address.");
+        return;
+      }
+      setAddress(walletAddress);
+      setSuccess(true);
+    } catch (err: any) {
+      setError(err?.code === 4001 ? "Connection request was rejected in your wallet." : "Wallet connection failed. Please try again.");
+    } finally {
+      setIsConnecting(false);
+    }
   };
 
   if (success) {
@@ -56,8 +76,9 @@ export default function WalletConnect() {
               </svg>
             </div>
             <h2 className="text-xl font-bold text-foreground">Wallet Connected</h2>
-            <p className="text-sm text-muted-foreground mt-2">{selected} has been connected to your account.</p>
-            <button onClick={() => { setSuccess(false); setSelected(null); setPhrase(""); }} className="mt-6 px-6 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-colors">
+             <p className="text-sm text-muted-foreground mt-2">{selected} has been connected to your account.</p>
+             <p className="mt-2 font-mono text-xs text-foreground/70">{address.slice(0, 6)}…{address.slice(-4)}</p>
+             <button onClick={() => { setSuccess(false); setSelected(null); setAddress(""); }} className="mt-6 px-6 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-colors">
               Connect Another Wallet
             </button>
           </div>
@@ -71,7 +92,7 @@ export default function WalletConnect() {
       <div className="px-8 py-8 space-y-6">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Wallet Connect</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">Connect your crypto wallet to import holdings</p>
+             <p className="text-sm text-muted-foreground mt-0.5">Connect your crypto wallet without sharing private credentials</p>
         </div>
 
         {!selected ? (
@@ -104,32 +125,22 @@ export default function WalletConnect() {
                 <h3 className="text-sm font-semibold text-foreground">Connect {selected}</h3>
               </div>
 
-              <div className="bg-yellow-400/10 border border-yellow-400/20 rounded-lg px-4 py-3 text-xs text-yellow-400">
-                Enter your wallet seed phrase to securely import your holdings and transaction history.
+               <div className="bg-yellow-400/10 border border-yellow-400/20 rounded-lg px-4 py-3 text-xs text-yellow-400">
+                 Never enter a seed phrase or private key here. Smartledger only requests a public address through your wallet’s official approval screen.
               </div>
 
-              <form onSubmit={handleConnect} className="space-y-4">
+               <div className="space-y-4">
                 {error && <p className="text-sm text-destructive">{error}</p>}
-                <div className="space-y-1.5">
-                  <label className="text-sm font-medium text-foreground">Seed phrase / Secret recovery phrase</label>
-                  <textarea
-                    value={phrase}
-                    onChange={(e) => setPhrase(e.target.value)}
-                    rows={4}
-                    className="w-full px-3 py-2.5 rounded-lg bg-input border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-none font-mono"
-                    placeholder="word1 word2 word3 word4 word5 word6 word7 word8 word9 word10 word11 word12"
-                    required
-                  />
-                  <p className="text-xs text-muted-foreground">Typically 12 or 24 words, separated by spaces</p>
-                </div>
                 <button
-                  type="submit"
-                  disabled={isPending}
+                   type="button"
+                   onClick={handleConnect}
+                   disabled={isConnecting}
                   className="w-full h-10 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-colors disabled:opacity-60"
                 >
-                  {isPending ? "Connecting..." : `Connect ${selected}`}
+                   {isConnecting ? "Approve in wallet..." : `Connect ${selected}`}
                 </button>
-              </form>
+                 <p className="text-xs text-muted-foreground text-center">Your wallet will ask you to approve access to your public address.</p>
+               </div>
             </div>
           </div>
         )}

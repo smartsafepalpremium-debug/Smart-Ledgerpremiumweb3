@@ -7,7 +7,6 @@
  */
 
 export interface InvestmentInput {
-  userId: number;
   planId: number;
   amount: number;
 }

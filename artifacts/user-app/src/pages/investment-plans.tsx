@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "wouter";
-import { useGetUserPlans, useCreateInvestment, useGetUserInvestments } from "@workspace/api-client-react";
+import { useGetUserPlans, useCreateInvestment, useGetUserInvestments, useGetUserPortfolio } from "@workspace/api-client-react";
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { useAuth } from "@/contexts/auth-context";
 
@@ -30,6 +30,7 @@ export default function InvestmentPlans() {
   const { user } = useAuth();
   const { data: plans, isLoading: plansLoading } = useGetUserPlans({});
   const { data: investments, isLoading: invLoading, refetch: refetchInvestments } = useGetUserInvestments({});
+  const { data: portfolio, refetch: refetchPortfolio } = useGetUserPortfolio({});
 
   const [dialog, setDialog] = useState<{ plan: any; color: typeof PLAN_COLORS[0] } | null>(null);
   const [amount, setAmount] = useState("");
@@ -43,11 +44,17 @@ export default function InvestmentPlans() {
   const { mutate: invest, isPending } = useCreateInvestment({
     mutation: {
       onSuccess: (data: any) => {
-        setSuccess({ plan: dialog!.plan, amount: data.amount, expectedReturn: data.expectedReturn });
+        const completedPlan = planList.find((plan: any) => plan.id === data.planId) ?? {
+          name: data.planName,
+          durationDays: data.durationDays,
+          roiPercent: data.roiPercent,
+        };
+        setSuccess({ plan: completedPlan, amount: data.amount, expectedReturn: data.expectedReturn });
         setDialog(null);
         setAmount("");
         setError("");
         refetchInvestments();
+        refetchPortfolio();
       },
       onError: (err: any) => {
         setError(err?.data?.error ?? "Investment failed. Please try again.");
@@ -68,14 +75,18 @@ export default function InvestmentPlans() {
     if (!user || !dialog) return;
     const amt = parseFloat(amount);
     if (isNaN(amt) || amt <= 0) { setError("Enter a valid amount"); return; }
-    invest({ data: { userId: user.id, planId: dialog.plan.id, amount: amt } });
+    invest({ data: { planId: dialog.plan.id, amount: amt } });
   };
 
   const previewReturn = () => {
     const amt = parseFloat(amount);
     if (isNaN(amt) || amt <= 0) return null;
-    return Math.round(amt * (1 + (dialog?.plan.roiPercent ?? 0) / 100) * 100) / 100;
+    const dailyProfit = Math.round((amt * (dialog?.plan.roiPercent ?? 0) / 100 + Number.EPSILON) * 100) / 100;
+    const totalProfit = Math.round((dailyProfit * (dialog?.plan.durationDays ?? 30) + Number.EPSILON) * 100) / 100;
+    return { dailyProfit, totalProfit, totalReturn: Math.round((amt + totalProfit + Number.EPSILON) * 100) / 100 };
   };
+
+  const availableBalance = Number((portfolio as any)?.withdrawableBalance ?? (portfolio as any)?.balance ?? user?.balance ?? 0);
 
   return (
     <DashboardLayout>
@@ -101,7 +112,7 @@ export default function InvestmentPlans() {
                         <p className="text-sm font-semibold text-foreground mt-0.5">{inv.planName}</p>
                       </div>
                       <span className="text-xs font-semibold text-green-400 bg-green-400/10 rounded-full px-2.5 py-0.5 border border-green-400/20">
-                        {inv.roiPercent}% ROI
+                         {inv.roiPercent}% daily
                       </span>
                     </div>
                     <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs">
@@ -110,14 +121,18 @@ export default function InvestmentPlans() {
                         <p className="text-foreground font-semibold">{fmtFull(inv.amount)}</p>
                       </div>
                       <div>
-                        <p className="text-muted-foreground">Expected return</p>
-                        <p className="text-primary font-semibold">{fmtFull(inv.expectedReturn)}</p>
+                         <p className="text-muted-foreground">Daily profit</p>
+                         <p className="text-green-400 font-semibold">+{fmtFull(inv.dailyProfit ?? 0)}</p>
+                       </div>
+                       <div>
+                         <p className="text-muted-foreground">Profit paid</p>
+                         <p className="text-primary font-semibold">{fmtFull(inv.profitPaid ?? 0)}</p>
                       </div>
                     </div>
                     <div className="space-y-1.5">
                       <div className="flex justify-between text-xs text-muted-foreground">
                         <span>{pct}% complete</span>
-                        <span>{left} days left</span>
+                         <span>{left} days until capital unlocks</span>
                       </div>
                       <div className="h-1.5 rounded-full bg-white/5 overflow-hidden">
                         <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${pct}%` }} />
@@ -160,7 +175,7 @@ export default function InvestmentPlans() {
 
                   <div className="flex items-end gap-1">
                     <span className={`text-4xl font-bold ${c.text}`}>{plan.roiPercent}%</span>
-                    <span className="text-sm text-muted-foreground mb-1">ROI</span>
+                     <span className="text-sm text-muted-foreground mb-1">daily</span>
                   </div>
 
                   {plan.description && (
@@ -203,7 +218,7 @@ export default function InvestmentPlans() {
             {[
               { step: "01", title: "Choose a plan", desc: "Select an investment plan that matches your goals and budget." },
               { step: "02", title: "Enter your amount", desc: "Click Invest Now and enter how much you want to invest from your balance." },
-              { step: "03", title: "Earn returns", desc: "Sit back and watch your ROI grow. Returns are paid at maturity." },
+               { step: "03", title: "Earn daily", desc: "Your daily percentage is added to withdrawable balance. Capital unlocks after 30 days." },
             ].map((item) => (
               <div key={item.step} className="flex gap-3">
                 <span className="text-2xl font-bold text-primary/40">{item.step}</span>
@@ -235,7 +250,7 @@ export default function InvestmentPlans() {
               <p className={`text-xs font-semibold uppercase tracking-widest ${dialog.color.text}`}>Invest</p>
               <h3 className="text-lg font-bold text-foreground mt-0.5">{dialog.plan.name}</h3>
               <div className="flex gap-4 mt-3 text-xs text-muted-foreground">
-                <span className={`font-semibold ${dialog.color.text}`}>{dialog.plan.roiPercent}% ROI</span>
+                 <span className={`font-semibold ${dialog.color.text}`}>{dialog.plan.roiPercent}% daily</span>
                 <span>·</span>
                 <span>{dialog.plan.durationDays} days</span>
                 <span>·</span>
@@ -244,15 +259,15 @@ export default function InvestmentPlans() {
             </div>
 
             {/* Balance */}
-            <div className={`rounded-lg px-4 py-3 mb-4 flex justify-between items-center ${(user?.balance ?? 0) < dialog.plan.minAmount ? "bg-yellow-400/10 border border-yellow-400/20" : "bg-white/5"}`}>
+             <div className={`rounded-lg px-4 py-3 mb-4 flex justify-between items-center ${availableBalance < dialog.plan.minAmount ? "bg-yellow-400/10 border border-yellow-400/20" : "bg-white/5"}`}>
               <span className="text-xs text-muted-foreground">Available balance</span>
-              <span className={`text-sm font-semibold ${(user?.balance ?? 0) < dialog.plan.minAmount ? "text-yellow-400" : "text-foreground"}`}>
-                {fmtFull(user?.balance ?? 0)}
+               <span className={`text-sm font-semibold ${availableBalance < dialog.plan.minAmount ? "text-yellow-400" : "text-foreground"}`}>
+                 {fmtFull(availableBalance)}
               </span>
             </div>
 
             {/* Insufficient balance — show deposit CTA */}
-            {(user?.balance ?? 0) < dialog.plan.minAmount ? (
+             {availableBalance < dialog.plan.minAmount ? (
               <div className="space-y-3">
                 <div className="bg-yellow-400/10 border border-yellow-400/20 rounded-xl px-4 py-4 text-center space-y-1.5">
                   <svg className="w-8 h-8 text-yellow-400 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -261,7 +276,7 @@ export default function InvestmentPlans() {
                   <p className="text-sm font-semibold text-yellow-400">Insufficient balance</p>
                   <p className="text-xs text-muted-foreground">
                     You need at least <span className="text-foreground font-medium">{fmt(dialog.plan.minAmount)}</span> to invest in this plan.
-                    Your balance is <span className="text-foreground font-medium">{fmtFull(user?.balance ?? 0)}</span>.
+                     Your withdrawable balance is <span className="text-foreground font-medium">{fmtFull(availableBalance)}</span>.
                   </p>
                 </div>
                 <Link
@@ -316,14 +331,14 @@ export default function InvestmentPlans() {
                     <span className="text-foreground font-medium">{fmtFull(parseFloat(amount) || 0)}</span>
                   </div>
                   <div className="flex justify-between text-muted-foreground">
-                    <span>ROI ({dialog.plan.roiPercent}%)</span>
-                    <span className="text-green-400 font-medium">+{fmtFull((previewReturn()! - (parseFloat(amount) || 0)))}</span>
+                     <span>Daily profit ({dialog.plan.roiPercent}%)</span>
+                     <span className="text-green-400 font-medium">+{fmtFull(previewReturn()!.dailyProfit)}</span>
                   </div>
                   <div className="flex justify-between border-t border-border pt-1.5">
                     <span className="font-semibold text-foreground">Total return</span>
-                    <span className={`font-bold ${dialog.color.text}`}>{fmtFull(previewReturn()!)}</span>
+                     <span className={`font-bold ${dialog.color.text}`}>{fmtFull(previewReturn()!.totalReturn)}</span>
                   </div>
-                  <p className="text-muted-foreground text-[10px]">Matures in {dialog.plan.durationDays} days</p>
+                   <p className="text-muted-foreground text-[10px]">Profit is withdrawable daily. Capital unlocks after 30 days.</p>
                 </div>
               )}
 
@@ -358,7 +373,7 @@ export default function InvestmentPlans() {
                 <span className="text-foreground font-semibold">{fmtFull(success.amount)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Expected return</span>
+                 <span className="text-muted-foreground">30-day return</span>
                 <span className="text-primary font-semibold">{fmtFull(success.expectedReturn)}</span>
               </div>
               <div className="flex justify-between">
