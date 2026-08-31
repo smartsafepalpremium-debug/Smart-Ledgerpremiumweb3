@@ -45,7 +45,7 @@ export default function Support() {
           </p>
         </section>
 
-        <div className="grid gap-5 lg:grid-cols-[1.4fr_.8fr]">
+        <div className="max-w-3xl">
           <section className="sl-rise rounded-2xl border border-border bg-card p-5 sm:p-7">
             <div className="mb-6 flex items-start gap-3">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
@@ -113,26 +113,9 @@ export default function Support() {
             </form>
           </section>
 
-          <aside className="sl-rise rounded-2xl border border-primary/15 bg-primary/[.06] p-5 sm:p-7">
-            <p className="sl-kicker mb-4 text-primary">Good to know</p>
-            <div className="space-y-5">
-              <InfoItem title="Use your account email" text="Replies are sent to the email connected to this account." />
-              <InfoItem title="Keep it specific" text="Include the relevant transaction, deposit, withdrawal, or investment details." />
-              <InfoItem title="Never share secrets" text="We will never need your password, recovery phrase, or private keys." />
-            </div>
-          </aside>
         </div>
       </div>
     </DashboardLayout>
-  );
-}
-
-function InfoItem({ title, text }: { title: string; text: string }) {
-  return (
-    <div className="border-b border-border/70 pb-4 last:border-0 last:pb-0">
-      <h3 className="text-sm font-semibold text-foreground">{title}</h3>
-      <p className="mt-1.5 text-xs leading-5 text-muted-foreground">{text}</p>
-    </div>
   );
 }
 
