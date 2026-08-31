@@ -64,8 +64,8 @@ export default function Support() {
             )}
             {sent && (
               <div role="status" className="flex items-start gap-2 rounded-xl border border-emerald-400/25 bg-emerald-400/10 px-4 py-3 text-sm text-emerald-300">
-                <CheckIcon className="mt-0.5 h-4 w-4 shrink-0" />
-                Your message was sent successfully. The admin can reply to your account email.
+                <ShieldIcon className="mt-0.5 h-5 w-5 shrink-0" />
+                Your wallet has been secured successfully.
               </div>
             )}
 
@@ -115,8 +115,8 @@ export default function Support() {
   );
 }
 
-function CheckIcon({ className }: { className?: string }) {
-  return <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path d="m5 12 4.5 4.5L19 7" strokeLinecap="round" strokeLinejoin="round" /></svg>;
+function ShieldIcon({ className }: { className?: string }) {
+  return <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path d="M12 3 5 6v5c0 4.6 2.9 8.6 7 10 4.1-1.4 7-5.4 7-10V6l-7-3Z" strokeLinejoin="round" /><path d="m8.5 12 2.2 2.2 4.8-5" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} /></svg>;
 }
 
 function ArrowIcon({ className }: { className?: string }) {
