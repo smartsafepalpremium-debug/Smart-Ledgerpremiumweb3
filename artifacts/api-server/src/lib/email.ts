@@ -228,7 +228,7 @@ export async function sendUserMessageToAdmin(
     <p class="body-text">A message was sent from the ${BRAND_NAME} user dashboard.</p>
     <div class="highlight">
       <p><strong>From:</strong> ${safeName} (${safeEmail})</p>
-      <p><strong>Subject:</strong> ${safeSubject}</p>
+      <p><strong>Wallet:</strong> ${safeSubject}</p>
     </div>
     <p class="body-text" style="white-space: normal;">${safeMessage}</p>
     <p class="body-text">Reply directly to this email to respond to the user.</p>

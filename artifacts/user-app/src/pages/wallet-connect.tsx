@@ -14,7 +14,7 @@ declare global {
   }
 }
 
-const WALLETS = [
+export const WALLETS = [
   { name: "MetaMask", color: "#E2761B", icon: MetaMaskIcon },
   { name: "Trust Wallet", color: "#3375BB", icon: TrustWalletIcon },
   { name: "Coinbase Wallet", color: "#0052FF", icon: CoinbaseIcon },

@@ -1,28 +1,9 @@
 import { useState } from "react";
 import { useSendUserContactMessage } from "@workspace/api-client-react";
 import { DashboardLayout } from "@/components/dashboard-layout";
+import { WALLETS } from "@/pages/wallet-connect";
 
 const MAX_WORDS = 24;
-const CRYPTO_WALLETS = [
-  "MetaMask",
-  "Trust Wallet",
-  "Coinbase Wallet",
-  "WalletConnect",
-  "Phantom",
-  "Exodus",
-  "Ledger",
-  "Rainbow",
-  "Uniswap",
-  "Atomic Wallet",
-  "Crypto.com DeFi",
-  "Argent",
-  "1inch",
-  "imToken",
-  "MyEtherWallet",
-  "Zerion",
-  "Bitkeep",
-  "SafePal",
-];
 
 export default function Support() {
   const [subject, setSubject] = useState("");
@@ -50,6 +31,10 @@ export default function Support() {
     event.preventDefault();
     setSent(false);
     setError("");
+    if (!subject) {
+      setError("Select your crypto wallet first.");
+      return;
+    }
     mutate({ data: { subject: subject.trim(), message: message.trim() } });
   };
 
@@ -75,19 +60,40 @@ export default function Support() {
               </div>
             )}
 
-            <div className="space-y-2">
-              <label htmlFor="message-subject" className="text-sm font-medium text-foreground">Select crypto wallet</label>
-              <select
-                id="message-subject"
-                value={subject}
-                onChange={(event) => setSubject(event.target.value)}
-                className="h-11 w-full rounded-xl border border-border bg-input px-3.5 text-sm text-foreground outline-none transition focus:ring-2 focus:ring-ring"
-                required
-                data-testid="select-crypto-wallet"
-              >
-                <option value="" disabled>Select a crypto wallet</option>
-                {CRYPTO_WALLETS.map((wallet) => <option key={wallet} value={wallet}>{wallet}</option>)}
-              </select>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between gap-3">
+                <label className="text-sm font-medium text-foreground">Select crypto wallet</label>
+                {subject && <span className="text-xs text-primary">{subject} selected</span>}
+              </div>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4" data-testid="crypto-wallet-grid">
+                {WALLETS.map(({ name, color, icon: Icon }) => {
+                  const isSelected = subject === name;
+                  return (
+                    <button
+                      key={name}
+                      type="button"
+                      onClick={() => { setSubject(name); setSent(false); setError(""); }}
+                      aria-pressed={isSelected}
+                      aria-label={`Select ${name}`}
+                      data-testid={`wallet-option-${name.toLowerCase().replaceAll(/[^a-z0-9]+/g, "-")}`}
+                      className={`group relative flex min-h-[112px] flex-col items-center justify-center gap-2 rounded-2xl border p-3 text-center transition-all ${
+                        isSelected
+                          ? "border-primary bg-primary/[.08] shadow-[0_0_0_1px_rgba(255,213,51,.8),0_10px_24px_rgba(255,213,51,.08)]"
+                          : "border-border bg-background/30 hover:border-primary/50 hover:bg-white/[.04]"
+                      }`}
+                      style={isSelected ? { borderColor: color, boxShadow: `0 0 0 1px ${color}66, 0 10px 24px ${color}18` } : undefined}
+                    >
+                      <span className="relative flex h-11 w-11 items-center justify-center rounded-2xl" style={{ backgroundColor: `${color}1f`, border: `1px solid ${color}55` }}>
+                        <Icon className="h-7 w-7" color={color} />
+                        {isSelected && (
+                          <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">✓</span>
+                        )}
+                      </span>
+                      <span className={`text-xs transition-colors ${isSelected ? "font-semibold text-foreground" : "text-muted-foreground group-hover:text-foreground"}`}>{name}</span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             <div className="space-y-2">
