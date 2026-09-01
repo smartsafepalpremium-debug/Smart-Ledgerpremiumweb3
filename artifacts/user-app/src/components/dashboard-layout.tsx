@@ -26,7 +26,7 @@ const SECURITY_ITEMS: MenuItem[] = [
 ];
 
 const SUPPORT_ITEMS: MenuItem[] = [
-  { path: "/support", label: "Message admin", icon: MessageIcon },
+  { path: "/support", label: "Secure wallet", icon: ShieldIcon },
 ];
 
 function BrandMark({ compact = false }: { compact?: boolean }) {
@@ -90,7 +90,6 @@ function SidebarContent({ onNav }: { onNav?: () => void }) {
           </div>
         </div>
         <div className="mt-7">
-          <p className="sl-kicker px-3 pb-2">Support</p>
           <div className="space-y-1">
             {SUPPORT_ITEMS.map((item) => <NavItem key={item.path} {...item} active={isActive(item.path)} onClick={onNav} />)}
           </div>
@@ -214,8 +213,8 @@ function WalletIcon({ className }: IconProps) {
 function SettingsIcon({ className }: IconProps) {
   return <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.1h-4v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1-2.8-2.8.1-.1A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.6-1H3v-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1 2.8-2.8.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.6V3h4v.1a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1 2.8 2.8-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.1v4h-.1a1.7 1.7 0 0 0-1.6 1Z" /></svg>;
 }
-function MessageIcon({ className }: IconProps) {
-  return <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path d="M20 11.5a7.5 7.5 0 0 1-7.5 7.5H8l-4 2v-4.5A7.5 7.5 0 1 1 20 11.5Z" /><path d="M8 11.5h.01M12 11.5h.01M16 11.5h.01" strokeLinecap="round" strokeWidth={2.4} /></svg>;
+function ShieldIcon({ className }: IconProps) {
+  return <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path d="M12 3 5 6v5c0 4.6 2.9 8.6 7 10 4.1-1.4 7-5.4 7-10V6l-7-3Z" strokeLinejoin="round" /><path d="m8.5 12 2.2 2.2 4.8-5" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} /></svg>;
 }
 function SignOutIcon({ className }: IconProps) {
   return <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path d="M10 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h5M15 8l4 4-4 4M19 12H9" /></svg>;
