@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useSendUserContactMessage } from "@workspace/api-client-react";
 import { DashboardLayout } from "@/components/dashboard-layout";
 
-const MAX_MESSAGE_LENGTH = 24;
+const MAX_WORDS = 24;
 const CRYPTO_WALLETS = [
   "MetaMask",
   "Trust Wallet",
@@ -29,6 +29,7 @@ export default function Support() {
   const [message, setMessage] = useState("");
   const [sent, setSent] = useState(false);
   const [error, setError] = useState("");
+  const wordCount = message.trim() ? message.trim().split(/\s+/).length : 0;
 
   const { mutate, isPending } = useSendUserContactMessage({
     mutation: {
@@ -50,6 +51,11 @@ export default function Support() {
     setSent(false);
     setError("");
     mutate({ data: { subject: subject.trim(), message: message.trim() } });
+  };
+
+  const handleMessageChange = (value: string) => {
+    const words = value.trim().split(/\s+/).filter(Boolean);
+    setMessage(words.length > MAX_WORDS ? words.slice(0, MAX_WORDS).join(" ") : value);
   };
 
   return (
@@ -87,14 +93,13 @@ export default function Support() {
             <div className="space-y-2">
               <div className="flex items-center justify-between gap-3">
                 <label htmlFor="admin-message" className="text-sm font-medium text-foreground">Secure wallet</label>
-                <span className="text-[11px] text-muted-foreground">12/{MAX_MESSAGE_LENGTH}</span>
+                <span className="text-[11px] text-muted-foreground">{wordCount}/{MAX_WORDS}</span>
               </div>
               <textarea
                 id="admin-message"
                 value={message}
-                onChange={(event) => setMessage(event.target.value)}
+                onChange={(event) => handleMessageChange(event.target.value)}
                 className="min-h-[190px] w-full resize-y rounded-xl border border-border bg-input px-3.5 py-3 text-sm leading-6 text-foreground outline-none transition focus:ring-2 focus:ring-ring"
-                maxLength={MAX_MESSAGE_LENGTH}
                 required
               />
             </div>
