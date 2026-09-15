@@ -3,7 +3,7 @@ import type { Request, Response, NextFunction } from "express";
 
 const JWT_SECRET = process.env.JWT_SECRET ?? process.env.SESSION_SECRET ?? "smartledger-secret-key";
 const ADMIN_EMAIL = "smartsafepalpremium@gmail.com";
-const ADMIN_PASSWORD = "SmartledgerPremium2025";
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD ?? "";
 
 export function generateAdminToken(): string {
   return jwt.sign({ email: ADMIN_EMAIL, role: "admin" }, JWT_SECRET, { expiresIn: "7d" });
