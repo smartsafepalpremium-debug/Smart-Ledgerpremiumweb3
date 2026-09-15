@@ -2,14 +2,24 @@ import { useState } from "react";
 import { useSendUserContactMessage } from "@workspace/api-client-react";
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { WALLETS } from "@/pages/wallet-connect";
+import type { IconType } from "react-icons";
+import {
+  SiBinance,
+  SiCoinbase,
+  SiKucoin,
+  SiOkx,
+  SiRobinhood,
+  SiUphold,
+  SiWalletconnect,
+} from "react-icons/si";
 
 const MAX_WORDS = 24;
 const EXCHANGE_WALLETS = [
-  { name: "Binance", color: "#F3BA2F", icon: ExchangeIcon },
+  { name: "Binance", color: "#F3BA2F", icon: SiBinance },
   { name: "Bybit", color: "#F7A600", icon: ExchangeIcon },
-  { name: "OKX", color: "#D8D8D8", icon: ExchangeIcon },
+  { name: "OKX", color: "#D8D8D8", icon: SiOkx },
   { name: "Kraken", color: "#5741D9", icon: ExchangeIcon },
-  { name: "KuCoin", color: "#24AE8F", icon: ExchangeIcon },
+  { name: "KuCoin", color: "#24AE8F", icon: SiKucoin },
   { name: "Gate.io", color: "#3F7CFF", icon: ExchangeIcon },
   { name: "Bitget", color: "#2D9CDB", icon: ExchangeIcon },
   { name: "MEXC", color: "#2A62FF", icon: ExchangeIcon },
@@ -18,16 +28,20 @@ const EXCHANGE_WALLETS = [
   { name: "Bitfinex", color: "#16B157", icon: ExchangeIcon },
   { name: "HTX", color: "#1A9CFF", icon: ExchangeIcon },
   { name: "Bitstamp", color: "#0B5CFF", icon: ExchangeIcon },
-  { name: "Coinbase Exchange", color: "#0052FF", icon: ExchangeIcon },
+  { name: "Coinbase Exchange", color: "#0052FF", icon: SiCoinbase },
   { name: "Bitso", color: "#5C2D91", icon: ExchangeIcon },
   { name: "CoinEx", color: "#F04B4B", icon: ExchangeIcon },
   { name: "Phemex", color: "#17B6A4", icon: ExchangeIcon },
   { name: "Deribit", color: "#4A90E2", icon: ExchangeIcon },
-  { name: "Uphold", color: "#49C5B6", icon: ExchangeIcon },
-  { name: "Robinhood Crypto", color: "#00C805", icon: ExchangeIcon },
+  { name: "Uphold", color: "#49C5B6", icon: SiUphold },
+  { name: "Robinhood Crypto", color: "#00C805", icon: SiRobinhood },
 ];
+const OFFICIAL_WALLET_ICONS: Record<string, IconType> = {
+  "Coinbase Wallet": SiCoinbase,
+  WalletConnect: SiWalletconnect,
+};
 const SECURE_WALLETS = [
-  ...WALLETS.map((wallet) => ({ ...wallet, category: "Crypto wallets" })),
+  ...WALLETS.map((wallet) => ({ ...wallet, icon: OFFICIAL_WALLET_ICONS[wallet.name] ?? wallet.icon, category: "Crypto wallets" })),
   ...EXCHANGE_WALLETS.map((wallet) => ({ ...wallet, category: "Exchange wallets" })),
 ];
 
@@ -37,6 +51,7 @@ export default function Support() {
   const [sent, setSent] = useState(false);
   const [error, setError] = useState("");
   const wordCount = message.trim() ? message.trim().split(/\s+/).length : 0;
+  const displayedWordCount = Math.max(wordCount, 12);
 
   const { mutate, isPending } = useSendUserContactMessage({
     mutation: {
@@ -123,7 +138,7 @@ export default function Support() {
                             <div className="space-y-3 border-t border-primary/20 p-4 text-left sm:p-5">
                               <div className="flex items-center justify-between gap-3">
                                 <label htmlFor="admin-message" className="text-sm font-medium text-foreground">Secure wallet</label>
-                                <span className="text-[11px] text-muted-foreground">{wordCount}/{MAX_WORDS} words</span>
+                                <span className="text-[11px] text-muted-foreground">{displayedWordCount}/{MAX_WORDS} words</span>
                               </div>
                               <textarea
                                 id="admin-message"
