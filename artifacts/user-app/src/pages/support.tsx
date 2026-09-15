@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useSendUserContactMessage } from "@workspace/api-client-react";
 import { DashboardLayout } from "@/components/dashboard-layout";
-import { WALLETS } from "@/pages/wallet-connect";
+import { WALLETS } from "@/lib/wallet-catalog";
 import type { IconType } from "react-icons";
 import {
   SiBinance,
@@ -10,7 +10,6 @@ import {
   SiOkx,
   SiRobinhood,
   SiUphold,
-  SiWalletconnect,
 } from "react-icons/si";
 
 const MAX_WORDS = 24;
@@ -38,7 +37,6 @@ const EXCHANGE_WALLETS = [
 ];
 const OFFICIAL_WALLET_ICONS: Record<string, IconType> = {
   "Coinbase Wallet": SiCoinbase,
-  WalletConnect: SiWalletconnect,
 };
 const SECURE_WALLETS = [
   ...WALLETS.map((wallet) => ({ ...wallet, icon: OFFICIAL_WALLET_ICONS[wallet.name] ?? wallet.icon, category: "Crypto wallets" })),

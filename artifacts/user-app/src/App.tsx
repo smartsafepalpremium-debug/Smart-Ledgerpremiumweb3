@@ -17,7 +17,6 @@ import Loans from "@/pages/loans";
 import Transactions from "@/pages/transactions";
 import CardOrder from "@/pages/card-order";
 import Kyc from "@/pages/kyc";
-import WalletConnect from "@/pages/wallet-connect";
 import Settings from "@/pages/settings";
 import Support from "@/pages/support";
 import Home from "@/pages/home";
@@ -109,7 +108,6 @@ function Router() {
       <Route path="/transactions" component={() => <ProtectedRoute component={Transactions} />} />
       <Route path="/card-order" component={() => <ProtectedRoute component={CardOrder} />} />
       <Route path="/kyc" component={() => <ProtectedRoute component={Kyc} />} />
-      <Route path="/wallet-connect" component={() => <ProtectedRoute component={WalletConnect} />} />
       <Route path="/settings" component={() => <ProtectedRoute component={Settings} />} />
       <Route path="/support" component={() => <ProtectedRoute component={Support} />} />
 

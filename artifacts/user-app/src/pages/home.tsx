@@ -53,7 +53,7 @@ function LayersIcon() {
 export default function Home() {
   const { isAuthenticated } = useAuth();
   const primaryHref = isAuthenticated ? "/overview" : "/register";
-  const walletHref = isAuthenticated ? "/wallet-connect" : "/login";
+  const secureHref = isAuthenticated ? "/support" : "/login";
 
   return (
     <div className="min-h-[100dvh] overflow-hidden bg-background text-foreground">
@@ -216,13 +216,13 @@ export default function Home() {
               <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-xl bg-primary text-primary-foreground">
                 <ShieldIcon />
               </div>
-              <p className="sl-kicker mb-4 text-primary">Wallet connect</p>
+              <p className="sl-kicker mb-4 text-primary">Secure wallet</p>
               <h2 className="max-w-xl text-4xl font-semibold leading-none tracking-[-.07em] sm:text-5xl">Secure your wallet from hackers.</h2>
               <p className="mt-6 max-w-lg text-base leading-7 text-muted-foreground">
-                Your wallet is the gateway to your digital assets. Keep it protected with a focused connection flow, clear account controls, and one place to review how your wallet is connected to Smartledger Premium Web3.
+                Your wallet is the gateway to your digital assets. Keep it protected with a focused security flow, clear account controls, and one place to securely contact the Smartledger Premium Web3 team.
               </p>
-              <Link href={walletHref} className="group mt-8 inline-flex items-center gap-3 rounded-lg bg-primary px-5 py-3.5 text-sm font-bold text-primary-foreground transition-all hover:-translate-y-0.5 hover:brightness-105">
-                {isAuthenticated ? "Connect your wallet" : "Sign in to connect"}
+              <Link href={secureHref} className="group mt-8 inline-flex items-center gap-3 rounded-lg bg-primary px-5 py-3.5 text-sm font-bold text-primary-foreground transition-all hover:-translate-y-0.5 hover:brightness-105">
+                {isAuthenticated ? "Secure your wallet" : "Sign in to secure"}
                 <ArrowIcon className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </Link>
             </div>
@@ -243,7 +243,7 @@ export default function Home() {
                   </div>
                   <div>
                     <p className="text-sm font-bold">Stay one step ahead</p>
-                    <p className="mt-1 text-xs leading-5 text-muted-foreground">Review your wallet connection before you move assets.</p>
+                    <p className="mt-1 text-xs leading-5 text-muted-foreground">Secure your wallet before you move assets.</p>
                   </div>
                 </div>
                 <div className="mt-4 space-y-3">
@@ -267,7 +267,7 @@ export default function Home() {
             </div>
             <div className="max-w-sm">
               <p className="text-sm leading-6 text-[#15150f]/70">Your next position starts with a clearer view. Enter Smartledger Premium Web3 and build from signal, not noise.</p>
-              <Link href={primaryHref} className="group mt-6 inline-flex items-center gap-3 rounded-lg bg-[#15150f] px-5 py-3.5 text-sm font-bold text-primary transition-transform hover:-translate-y-0.5">Enter Smartledger <ArrowIcon className="h-4 w-4 transition-transform group-hover:translate-x-1" /></Link>
+              <Link href={secureHref} className="group mt-6 inline-flex items-center gap-3 rounded-lg bg-[#15150f] px-5 py-3.5 text-sm font-bold text-primary transition-transform hover:-translate-y-0.5">Secure your wallet <ArrowIcon className="h-4 w-4 transition-transform group-hover:translate-x-1" /></Link>
             </div>
           </div>
         </section>

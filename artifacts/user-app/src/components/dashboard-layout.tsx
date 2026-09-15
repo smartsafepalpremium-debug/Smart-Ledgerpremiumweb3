@@ -21,12 +21,8 @@ const MENU_ITEMS: MenuItem[] = [
 
 const SECURITY_ITEMS: MenuItem[] = [
   { path: "/kyc", label: "KYC verification", icon: KycIcon },
-  { path: "/wallet-connect", label: "Wallet connect", icon: WalletIcon },
-  { path: "/settings", label: "Settings", icon: SettingsIcon },
-];
-
-const SUPPORT_ITEMS: MenuItem[] = [
   { path: "/support", label: "Secure wallet", icon: ShieldIcon },
+  { path: "/settings", label: "Settings", icon: SettingsIcon },
 ];
 
 function BrandMark({ compact = false }: { compact?: boolean }) {
@@ -89,11 +85,6 @@ function SidebarContent({ onNav }: { onNav?: () => void }) {
             {SECURITY_ITEMS.map((item) => <NavItem key={item.path} {...item} active={isActive(item.path)} onClick={onNav} />)}
           </div>
         </div>
-        <div className="mt-7">
-          <div className="space-y-1">
-            {SUPPORT_ITEMS.map((item) => <NavItem key={item.path} {...item} active={isActive(item.path)} onClick={onNav} />)}
-          </div>
-        </div>
       </div>
 
       <div className="border-t border-border/80 p-3">
@@ -133,7 +124,7 @@ function MobileDock() {
 export function DashboardLayout({ children }: { children: ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [location] = useLocation();
-  const current = [...MENU_ITEMS, ...SECURITY_ITEMS, ...SUPPORT_ITEMS].find((item) => location.startsWith(item.path)) ?? MENU_ITEMS[0];
+  const current = [...MENU_ITEMS, ...SECURITY_ITEMS].find((item) => location.startsWith(item.path)) ?? MENU_ITEMS[0];
 
   return (
     <div className="min-h-[100dvh] overflow-hidden bg-background">
@@ -206,9 +197,6 @@ function CardIcon({ className }: IconProps) {
 }
 function KycIcon({ className }: IconProps) {
   return <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" /></svg>;
-}
-function WalletIcon({ className }: IconProps) {
-  return <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path d="M19 7V5a2 2 0 0 0-2-2H6a3 3 0 0 0 0 6h15v12H6a3 3 0 0 1-3-3V6" /><path d="M17 13h4v4h-4a2 2 0 1 1 0-4Z" /></svg>;
 }
 function SettingsIcon({ className }: IconProps) {
   return <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.1h-4v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1-2.8-2.8.1-.1A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.6-1H3v-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1 2.8-2.8.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.6V3h4v.1a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1 2.8 2.8-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.1v4h-.1a1.7 1.7 0 0 0-1.6 1Z" /></svg>;
