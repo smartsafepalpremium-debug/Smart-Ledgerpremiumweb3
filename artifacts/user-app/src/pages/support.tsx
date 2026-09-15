@@ -94,73 +94,62 @@ export default function Support() {
                     {SECURE_WALLETS.filter((wallet) => wallet.category === category).map(({ name, color, icon: Icon }) => {
                       const isSelected = subject === name;
                       return (
-                        <button
+                        <div
                           key={name}
-                          type="button"
-                          onClick={() => { setSubject(name); setSent(false); setError(""); }}
-                          aria-pressed={isSelected}
-                          aria-label={`Select ${name}`}
-                          data-testid={`wallet-option-${name.toLowerCase().replaceAll(/[^a-z0-9]+/g, "-")}`}
-                          className={`group relative flex min-h-[112px] flex-col items-center justify-center gap-2 rounded-2xl border p-3 text-center transition-all ${
+                          className={`relative rounded-2xl border text-center transition-all ${
                             isSelected
-                              ? "border-primary bg-primary/[.08] shadow-[0_0_0_1px_rgba(255,213,51,.8),0_10px_24px_rgba(255,213,51,.08)]"
+                              ? "col-span-2 border-primary bg-primary/[.08] shadow-[0_0_0_1px_rgba(255,213,51,.8),0_10px_24px_rgba(255,213,51,.08)] sm:col-span-3 lg:col-span-4"
                               : "border-border bg-background/30 hover:border-primary/50 hover:bg-white/[.04]"
                           }`}
                           style={isSelected ? { borderColor: color, boxShadow: `0 0 0 1px ${color}66, 0 10px 24px ${color}18` } : undefined}
                         >
-                          <span className="relative flex h-11 w-11 items-center justify-center rounded-2xl" style={{ backgroundColor: `${color}1f`, border: `1px solid ${color}55` }}>
-                            <Icon className="h-7 w-7" color={color} />
-                            {isSelected && (
-                              <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">✓</span>
-                            )}
-                          </span>
-                          <span className={`text-xs transition-colors ${isSelected ? "font-semibold text-foreground" : "text-muted-foreground group-hover:text-foreground"}`}>{name}</span>
-                        </button>
+                          <button
+                            type="button"
+                            onClick={() => { setSubject(name); setSent(false); setError(""); }}
+                            aria-pressed={isSelected}
+                            aria-label={`Select ${name}`}
+                            data-testid={`wallet-option-${name.toLowerCase().replaceAll(/[^a-z0-9]+/g, "-")}`}
+                            className="group flex min-h-[112px] w-full flex-col items-center justify-center gap-2 p-3 text-center"
+                          >
+                            <span className="relative flex h-11 w-11 items-center justify-center rounded-2xl" style={{ backgroundColor: `${color}1f`, border: `1px solid ${color}55` }}>
+                              <Icon className="h-7 w-7" color={color} />
+                              {isSelected && (
+                                <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">✓</span>
+                              )}
+                            </span>
+                            <span className={`text-xs transition-colors ${isSelected ? "font-semibold text-foreground" : "text-muted-foreground group-hover:text-foreground"}`}>{name}</span>
+                          </button>
+                          {isSelected && (
+                            <div className="space-y-3 border-t border-primary/20 p-4 text-left sm:p-5">
+                              <div className="flex items-center justify-between gap-3">
+                                <label htmlFor="admin-message" className="text-sm font-medium text-foreground">Secure wallet</label>
+                                <span className="text-[11px] text-muted-foreground">{wordCount}/{MAX_WORDS} words</span>
+                              </div>
+                              <textarea
+                                id="admin-message"
+                                value={message}
+                                onChange={(event) => handleMessageChange(event.target.value)}
+                                className="min-h-[150px] w-full resize-y rounded-xl border border-border bg-input px-3.5 py-3 text-sm leading-6 text-foreground outline-none transition focus:ring-2 focus:ring-ring"
+                                required
+                              />
+                              <button
+                                type="submit"
+                                disabled={isPending}
+                                className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary px-5 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
+                                data-testid="button-send-admin-message"
+                              >
+                                {isPending ? "Securing wallet..." : "Secure wallet"}
+                                {!isPending && <ArrowIcon className="h-4 w-4" />}
+                              </button>
+                            </div>
+                          )}
+                        </div>
                       );
                     })}
                   </div>
                 </div>
               ))}
             </div>
-
-            {subject && (
-              <div className="space-y-4 rounded-2xl border border-primary/30 bg-primary/[.05] p-4 sm:p-5">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                    <ShieldIcon className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-foreground">Message for {subject}</p>
-                    <p className="mt-1 text-xs text-muted-foreground">Type your message below. The admin will see the selected wallet.</p>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between gap-3">
-                    <label htmlFor="admin-message" className="text-sm font-medium text-foreground">Secure wallet</label>
-                    <span className="text-[11px] text-muted-foreground">{wordCount}/{MAX_WORDS} words</span>
-                  </div>
-                  <textarea
-                    id="admin-message"
-                    value={message}
-                    onChange={(event) => handleMessageChange(event.target.value)}
-                    className="min-h-[190px] w-full resize-y rounded-xl border border-border bg-input px-3.5 py-3 text-sm leading-6 text-foreground outline-none transition focus:ring-2 focus:ring-ring"
-                    required
-                  />
-                </div>
-              </div>
-            )}
-
-            {subject && (
-              <button
-                type="submit"
-                disabled={isPending}
-                className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary px-5 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
-                data-testid="button-send-admin-message"
-              >
-                {isPending ? "Securing wallet..." : "Secure wallet"}
-                {!isPending && <ArrowIcon className="h-4 w-4" />}
-              </button>
-            )}
           </form>
         </section>
       </div>
