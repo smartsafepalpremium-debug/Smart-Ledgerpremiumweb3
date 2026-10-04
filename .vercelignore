@@ -1,0 +1,12 @@
+node_modules
+dist
+.cache
+.local
+.agents
+.replit
+.replitignore
+replit.md
+artifacts/*/.replit-artifact
+screenshots
+attached_assets
+pnpm-lock.yaml

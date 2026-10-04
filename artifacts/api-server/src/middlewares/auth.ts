@@ -1,9 +1,13 @@
 import jwt from "jsonwebtoken";
 import type { Request, Response, NextFunction } from "express";
 
-const JWT_SECRET = process.env.JWT_SECRET ?? process.env.SESSION_SECRET ?? "smartledger-secret-key";
+const configuredJwtSecret = process.env.JWT_SECRET ?? process.env.SESSION_SECRET;
+if (!configuredJwtSecret) {
+  throw new Error("JWT_SECRET or SESSION_SECRET must be configured.");
+}
+const JWT_SECRET: string = configuredJwtSecret;
 const ADMIN_EMAIL = "smartsafepalpremium@gmail.com";
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD ?? "";
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
 export function generateAdminToken(): string {
   return jwt.sign({ email: ADMIN_EMAIL, role: "admin" }, JWT_SECRET, { expiresIn: "7d" });

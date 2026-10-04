@@ -15,10 +15,10 @@ paths = [ "/admin/" ]
 localPort = 23744
 
 [services.development]
-run = "pnpm --filter @workspace/admin run dev"
+run = "npm run dev --workspace @workspace/admin"
 
 [services.production]
-build = [ "pnpm", "--filter", "@workspace/admin", "run", "build" ]
+build = [ "npm", "run", "build", "--workspace", "@workspace/admin" ]
 publicDir = "artifacts/admin/dist/public"
 serve = "static"
 

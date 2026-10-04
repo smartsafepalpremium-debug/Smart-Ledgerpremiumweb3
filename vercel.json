@@ -1,0 +1,26 @@
+{
+  "version": 2,
+  "buildCommand": "npm run build:vercel",
+  "outputDirectory": "dist",
+  "cleanUrls": true,
+  "rewrites": [
+    {
+      "source": "/admin",
+      "destination": "/admin/index.html"
+    },
+    {
+      "source": "/admin/(.*)",
+      "destination": "/admin/index.html"
+    },
+    {
+      "source": "/(login|register|overview|trade|investment-plans|portfolio|deposit|withdraw|loans|transactions|card-order|kyc|settings|support)",
+      "destination": "/index.html"
+    }
+  ],
+  "crons": [
+    {
+      "path": "/api/cron/accrual",
+      "schedule": "0 * * * *"
+    }
+  ]
+}

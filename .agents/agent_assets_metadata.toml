@@ -1,8 +1,0 @@
-uploads = []
-generated = []
-
-[[outputs]]
-id = "AwVDiSRemmwyP-6JRzyZC"
-uri = "file://smartledger-premium.tar.gz"
-type = "unspecified"
-title = "Smartledger Premium — Full Source Code"
