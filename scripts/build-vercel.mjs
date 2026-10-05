@@ -5,7 +5,7 @@ import { spawnSync } from "node:child_process";
 
 const rootDir = path.dirname(fileURLToPath(import.meta.url));
 const projectDir = path.resolve(rootDir, "..");
-const outputDir = path.join(projectDir, "dist");
+const outputDir = path.join(projectDir, "public");
 
 function run(command, args, env = {}) {
   const result = spawnSync(command, args, {
