@@ -27,7 +27,7 @@ This repository is configured as one Vercel project:
 - `/` serves the user application.
 - `/admin` and `/admin/*` serve the administrator application.
 - `/api/*` is handled by the Express application exported from the root `index.ts`.
-- `/api/cron/accrual` runs the hourly investment accrual sweep.
+- `/api/cron/accrual` runs the daily investment accrual sweep at 00:00 UTC. This cadence is compatible with Vercel Hobby; the accrual logic catches up all fully elapsed days since the previous sweep.
 
 Create a Vercel project using the repository root as its project directory. Vercel will use the committed `vercel.json` configuration and run:
 
